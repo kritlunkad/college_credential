@@ -8,6 +8,8 @@
 const BiometricAuth = (() => {
   const KEY_ID = 'cc_webauthn_credential_id';
   const KEY_ENABLED = 'cc_biometric_enabled';
+  const KEY_LAST_OK_TS = 'cc_biometric_last_ok_ts';
+  const VERIFY_GRACE_MS = 10 * 60 * 1000; // 10 min session grace
 
   function toBase64Url(buffer) {
     const bytes = new Uint8Array(buffer);
@@ -43,6 +45,16 @@ const BiometricAuth = (() => {
     return !!localStorage.getItem(KEY_ID);
   }
 
+  function getLastVerifiedAt() {
+    const raw = sessionStorage.getItem(KEY_LAST_OK_TS);
+    const ts = raw ? Number(raw) : 0;
+    return Number.isFinite(ts) ? ts : 0;
+  }
+
+  function markVerifiedNow() {
+    sessionStorage.setItem(KEY_LAST_OK_TS, String(Date.now()));
+  }
+
   async function enroll() {
     if (!isSupported()) throw new Error('WebAuthn not supported on this device');
 
@@ -67,12 +79,14 @@ const BiometricAuth = (() => {
     if (!cred || !cred.rawId) throw new Error('Biometric enrollment failed');
     localStorage.setItem(KEY_ID, toBase64Url(cred.rawId));
     localStorage.setItem(KEY_ENABLED, 'true');
+    markVerifiedNow();
     return true;
   }
 
   async function verify() {
     if (!isSupported()) return true;
     if (!isEnabled() || !hasCredential()) return true;
+    if (Date.now() - getLastVerifiedAt() < VERIFY_GRACE_MS) return true;
 
     const id = localStorage.getItem(KEY_ID);
     const publicKey = {
@@ -83,11 +97,14 @@ const BiometricAuth = (() => {
     };
 
     const assertion = await navigator.credentials.get({ publicKey });
-    return !!assertion;
+    const ok = !!assertion;
+    if (ok) markVerifiedNow();
+    return ok;
   }
 
   function disable() {
     localStorage.removeItem(KEY_ENABLED);
+    sessionStorage.removeItem(KEY_LAST_OK_TS);
   }
 
   return {
