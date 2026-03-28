@@ -688,7 +688,8 @@
   document.getElementById('btn-export-log').addEventListener('click', exportLog);
   document.getElementById('btn-connect-issuer-wallet').addEventListener('click', () => connectIssuerWallet(true));
   document.getElementById('btn-admin-login').addEventListener('click', adminLogin);
-  document.getElementById('btn-admin-logout').addEventListener('click', adminLogout);
+  const cardLogoutBtn = document.getElementById('btn-admin-logout');
+  if (cardLogoutBtn) cardLogoutBtn.addEventListener('click', adminLogout);
   document.getElementById('btn-header-logout').addEventListener('click', adminLogout);
   document.getElementById('btn-admin-biometric').addEventListener('click', async () => {
     if (typeof BiometricAuth === 'undefined') {
