@@ -7,6 +7,75 @@
   let privateKey = null;
   let publicKeyJwk = null;
   let selectedType = null;
+  let issuerWalletAddress = null;
+  const ISSUER_WALLET_KEY = 'cc_selected_issuer_wallet';
+
+  function formatAddress(addr) {
+    if (!addr || typeof addr !== 'string') return '—';
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  }
+
+  function renderIssuerWallet() {
+    const statusEl = document.getElementById('issuer-wallet-status');
+    const addressEl = document.getElementById('issuer-wallet-address');
+    if (!statusEl || !addressEl) return;
+
+    if (issuerWalletAddress) {
+      statusEl.textContent = `Connected: ${formatAddress(issuerWalletAddress)}`;
+      statusEl.style.color = 'var(--accent-green-light)';
+      addressEl.textContent = issuerWalletAddress;
+    } else {
+      statusEl.textContent = 'Not connected';
+      statusEl.style.color = 'var(--text-secondary)';
+      addressEl.textContent = '—';
+    }
+  }
+
+  function loadIssuerWalletSelection() {
+    try {
+      const v = localStorage.getItem(ISSUER_WALLET_KEY);
+      issuerWalletAddress = v || null;
+    } catch {
+      issuerWalletAddress = null;
+    }
+  }
+
+  function saveIssuerWalletSelection(addr) {
+    try {
+      if (addr) localStorage.setItem(ISSUER_WALLET_KEY, addr);
+      else localStorage.removeItem(ISSUER_WALLET_KEY);
+    } catch {
+      // ignore storage failures
+    }
+  }
+
+  async function connectIssuerWallet(requestAccess = true) {
+    if (typeof BlockchainModule === 'undefined') {
+      if (requestAccess) showToast('Blockchain module not loaded', 'error');
+      return null;
+    }
+    if (!window.ethereum) {
+      if (requestAccess) showToast('MetaMask not detected', 'error');
+      return null;
+    }
+
+    try {
+      const addr = await BlockchainModule.getConnectedAddress(requestAccess);
+      issuerWalletAddress = addr || null;
+      saveIssuerWalletSelection(issuerWalletAddress);
+      renderIssuerWallet();
+      if (addr && requestAccess) {
+        showToast(`Issuer wallet connected: ${formatAddress(addr)}`, 'success');
+      }
+      return issuerWalletAddress;
+    } catch (e) {
+      if (requestAccess) showToast(`Wallet connect failed: ${e.message}`, 'error');
+      issuerWalletAddress = null;
+      saveIssuerWalletSelection(null);
+      renderIssuerWallet();
+      return null;
+    }
+  }
 
   // ── Initialize keys ─────────────────────────────────────────────
   async function initKeys() {
@@ -180,7 +249,12 @@
     const issuerDid = document.getElementById('issuer-did').value.trim();
     const expiryDays = parseInt(document.getElementById('expiry-days').value) || 365;
 
-    const issuer = { id: issuerDid, name: issuerName };
+    if (!issuerWalletAddress) {
+      showToast('Connect the issuer MetaMask wallet before issuing', 'error');
+      return;
+    }
+
+    const issuer = { id: issuerDid, name: issuerName, walletAddress: issuerWalletAddress };
 
     // Build credential
     const credential = buildCredential(type, subjectData, issuer, expiryDays);
@@ -353,6 +427,7 @@
   document.getElementById('btn-issue').addEventListener('click', issueCredential);
   document.getElementById('btn-fill-sample').addEventListener('click', fillSampleData);
   document.getElementById('btn-export-log').addEventListener('click', exportLog);
+  document.getElementById('btn-connect-issuer-wallet').addEventListener('click', () => connectIssuerWallet(true));
 
   // Re-register public key when issuer name changes
   document.getElementById('issuer-name').addEventListener('change', () => {
@@ -368,6 +443,9 @@
   StateManager.enableCrossTabSync();
 
   // ── Init ────────────────────────────────────────────────────────
+  loadIssuerWalletSelection();
+  renderIssuerWallet();
+
   await initKeys();
   renderTypeSelector();
   renderIssuedList();

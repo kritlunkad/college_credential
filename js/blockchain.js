@@ -36,6 +36,14 @@ const BlockchainModule = (() => {
     return typeof ethers !== 'undefined';
   }
 
+  function normalizeAddress(addr) {
+    return typeof addr === 'string' ? addr.trim().toLowerCase() : '';
+  }
+
+  function addressesEqual(a, b) {
+    return !!normalizeAddress(a) && normalizeAddress(a) === normalizeAddress(b);
+  }
+
   function isConfigured() {
     const cfg = getConfig();
     return /^0x[a-fA-F0-9]{40}$/.test(cfg.CONTRACT_ADDRESS);
@@ -100,6 +108,16 @@ const BlockchainModule = (() => {
     return new ethers.Contract(cfg.CONTRACT_ADDRESS, CONTRACT_ABI, provider);
   }
 
+  async function getConnectedAddress(requestAccess = true) {
+    if (!window.ethereum) return null;
+    if (requestAccess) {
+      const acc = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      return acc && acc[0] ? acc[0] : null;
+    }
+    const acc = await window.ethereum.request({ method: 'eth_accounts' });
+    return acc && acc[0] ? acc[0] : null;
+  }
+
   async function ensureWalletNetwork(provider) {
     const cfg = getConfig();
     const current = await provider.getNetwork();
@@ -134,6 +152,7 @@ const BlockchainModule = (() => {
     await ensureWalletNetwork(provider);
 
     const signer = await provider.getSigner();
+    const from = await signer.getAddress();
     const contract = new ethers.Contract(cfg.CONTRACT_ADDRESS, CONTRACT_ABI, signer);
     const tx = await contract.storeHash(hash);
     const receipt = await tx.wait();
@@ -147,6 +166,7 @@ const BlockchainModule = (() => {
 
     return {
       hash,
+      from,
       txHash: tx.hash,
       blockNumber: receipt?.blockNumber || null,
       chainId: cfg.CHAIN_ID,
@@ -177,6 +197,9 @@ const BlockchainModule = (() => {
     CONTRACT_ABI,
     getConfig,
     isConfigured,
+    normalizeAddress,
+    addressesEqual,
+    getConnectedAddress,
     getExplorerTxUrl,
     getCredentialAnchorPayload,
     computeCredentialHash,

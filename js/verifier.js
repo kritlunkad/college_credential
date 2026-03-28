@@ -237,7 +237,31 @@
         if (overallStatus === 'success') overallStatus = 'warning';
       }
 
-      // ── Check 7: REAL Groth16 ZKP Proof Verification ──────────────
+      // ── Check 7: Issuer vs Holder Wallet Separation ──────────────
+      const issuerWallet = cred.issuer?.walletAddress || null;
+      const holderWallet = presentation.blockchain?.holderWalletAddress || null;
+      if (issuerWallet && holderWallet) {
+        const sameWallet = typeof BlockchainModule !== 'undefined'
+          ? BlockchainModule.addressesEqual(issuerWallet, holderWallet)
+          : issuerWallet.trim().toLowerCase() === holderWallet.trim().toLowerCase();
+        checks.push({
+          label: 'Entity Separation',
+          status: sameWallet ? 'fail' : 'pass',
+          detail: sameWallet
+            ? `❌ Issuer wallet and student wallet are the same (${issuerWallet}). They must be different entities.`
+            : `✅ Issuer wallet (${issuerWallet}) and student wallet (${holderWallet}) are distinct.`,
+        });
+        if (sameWallet) overallStatus = 'failure';
+      } else {
+        checks.push({
+          label: 'Entity Separation',
+          status: 'warning',
+          detail: '⚠️ Missing issuer or student wallet address; cannot fully prove role separation',
+        });
+        if (overallStatus === 'success') overallStatus = 'warning';
+      }
+
+      // ── Check 8: REAL Groth16 ZKP Proof Verification ──────────────
       for (const [field, proofData] of Object.entries(zkpProofs)) {
         if (proofData.type === 'Groth16' && proofData.proof && proofData.publicSignals) {
           try {

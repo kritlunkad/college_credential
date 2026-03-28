@@ -126,6 +126,7 @@ function buildCredential(type, subjectData, issuer, expiryDays = 365) {
     issuer: {
       id: issuer.id,
       name: issuer.name,
+      ...(issuer.walletAddress ? { walletAddress: issuer.walletAddress } : {}),
     },
     issuanceDate: now.toISOString(),
     expirationDate: expiry.toISOString(),

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="College Credential Issuer Portal — Issue verifiable academic credentials with cryptographic signatures.">
   <title>College Portal — CredChain Issuer</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=20260328-6">
 </head>
 <body>
 
@@ -43,6 +43,16 @@
     <div id="key-status" class="status-indicator" style="margin-bottom: var(--space-lg);">
       <span class="dot"></span>
       <span id="key-status-text">Initializing key pair...</span>
+    </div>
+
+    <!-- Issuer Wallet -->
+    <div class="card" style="margin-bottom: var(--space-lg);">
+      <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: var(--space-md);">Issuer MetaMask Wallet</h3>
+      <div style="display:flex; gap: var(--space-sm); align-items:center; flex-wrap: wrap;">
+        <button class="btn btn-primary btn-sm" id="btn-connect-issuer-wallet">🦊 Connect Issuer Wallet</button>
+        <span id="issuer-wallet-status" style="font-size:0.8rem; color:var(--text-secondary);">Not connected</span>
+      </div>
+      <div id="issuer-wallet-address" style="font-size:0.72rem; color:var(--text-muted); margin-top: var(--space-sm); word-break: break-all;">—</div>
     </div>
 
     <!-- Stats -->
@@ -134,10 +144,12 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Scripts (order matters: state → crypto → store → data → college) -->
-  <script src="js/state.js"></script>
-  <script src="js/crypto.js"></script>
-  <script src="js/store.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/college.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.1/dist/ethers.umd.min.js"></script>
+  <script src="js/state.js?v=20260328-6"></script>
+  <script src="js/crypto.js?v=20260328-6"></script>
+  <script src="js/store.js?v=20260328-6"></script>
+  <script src="js/data.js?v=20260328-6"></script>
+  <script src="js/blockchain.js?v=20260328-6"></script>
+  <script src="js/college.js?v=20260328-6"></script>
 </body>
 </html>

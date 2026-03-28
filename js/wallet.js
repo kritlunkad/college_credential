@@ -8,10 +8,76 @@
 
 (function WalletPortal() {
   let currentShareCredential = null;
+  let holderWalletAddress = null;
+  const HOLDER_WALLET_KEY = 'cc_selected_holder_wallet';
 
   // ZKP artifacts paths
   const ZKP_WASM = 'zkp/gpa_range_proof.wasm';
   const ZKP_ZKEY = 'zkp/gpa_range_proof.zkey';
+
+  function formatAddress(addr) {
+    if (!addr || typeof addr !== 'string') return '—';
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  }
+
+  function renderHolderWallet() {
+    const statusEl = document.getElementById('holder-wallet-status');
+    const addressEl = document.getElementById('holder-wallet-address');
+    if (!statusEl || !addressEl) return;
+
+    if (holderWalletAddress) {
+      statusEl.textContent = `Connected: ${formatAddress(holderWalletAddress)}`;
+      statusEl.style.color = 'var(--accent-green-light)';
+      addressEl.textContent = holderWalletAddress;
+    } else {
+      statusEl.textContent = 'Not connected';
+      statusEl.style.color = 'var(--text-secondary)';
+      addressEl.textContent = '—';
+    }
+  }
+
+  function loadHolderWalletSelection() {
+    try {
+      const v = localStorage.getItem(HOLDER_WALLET_KEY);
+      holderWalletAddress = v || null;
+    } catch {
+      holderWalletAddress = null;
+    }
+  }
+
+  function saveHolderWalletSelection(addr) {
+    try {
+      if (addr) localStorage.setItem(HOLDER_WALLET_KEY, addr);
+      else localStorage.removeItem(HOLDER_WALLET_KEY);
+    } catch {
+      // ignore storage failures
+    }
+  }
+
+  async function connectHolderWallet(requestAccess = true) {
+    if (typeof BlockchainModule === 'undefined') {
+      if (requestAccess) showToast('Blockchain module not loaded', 'error');
+      return null;
+    }
+    if (!window.ethereum) {
+      if (requestAccess) showToast('MetaMask not detected', 'error');
+      return null;
+    }
+    try {
+      const addr = await BlockchainModule.getConnectedAddress(requestAccess);
+      holderWalletAddress = addr || null;
+      saveHolderWalletSelection(holderWalletAddress);
+      renderHolderWallet();
+      if (addr && requestAccess) showToast(`Student wallet connected: ${formatAddress(addr)}`, 'success');
+      return holderWalletAddress;
+    } catch (e) {
+      if (requestAccess) showToast(`Wallet connect failed: ${e.message}`, 'error');
+      holderWalletAddress = null;
+      saveHolderWalletSelection(null);
+      renderHolderWallet();
+      return null;
+    }
+  }
 
   // ── Claim Credentials ───────────────────────────────────────────
   function claimCredentials() {
@@ -471,6 +537,7 @@
             txHash: existingPresentation?.blockchain?.txHash || null,
             anchorTime: existingPresentation?.blockchain?.anchorTime || null,
             anchoredAt: existingPresentation?.blockchain?.anchoredAt || null,
+            holderWalletAddress: existingPresentation?.blockchain?.holderWalletAddress || null,
           };
         } catch (e) {
           console.error('[Blockchain] Failed to compute anchor hash:', e);
@@ -483,6 +550,7 @@
             txHash: existingPresentation?.blockchain?.txHash || null,
             anchorTime: existingPresentation?.blockchain?.anchorTime || null,
             anchoredAt: existingPresentation?.blockchain?.anchoredAt || null,
+            holderWalletAddress: existingPresentation?.blockchain?.holderWalletAddress || null,
             error: e.message,
           };
         }
@@ -522,6 +590,11 @@
       : '';
 
     const blockchain = presentation.blockchain || {};
+    const issuerWallet = presentation.credential?.issuer?.walletAddress || null;
+    const holderWallet = blockchain.holderWalletAddress || null;
+    const separationOk = issuerWallet && holderWallet
+      ? !BlockchainModule?.addressesEqual(issuerWallet, holderWallet)
+      : null;
     const canAnchor = typeof BlockchainModule !== 'undefined' && BlockchainModule.isConfigured() && !!blockchain.anchorHash;
     const anchorState = blockchain.anchored
       ? `✅ Anchored on ${blockchain.network || 'chain'}`
@@ -553,6 +626,10 @@
         <div style="font-size:0.8rem; font-weight:600; margin-bottom: var(--space-xs);">Blockchain Anchor (Polygon Amoy)</div>
         <div style="font-size:0.72rem; color:var(--text-muted); word-break:break-all; margin-bottom: var(--space-sm);">
           Hash: ${blockchain.anchorHash || 'Unavailable'}
+        </div>
+        <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom: var(--space-sm);">
+          Issuer Wallet: ${issuerWallet || 'Not set on credential'}<br>
+          Student Wallet: ${holderWallet || 'Not anchored yet'}${separationOk === null ? '' : `<br>Separation: ${separationOk ? '✅ Different wallets' : '❌ Same wallet'}`}
         </div>
         ${anchorButton}
         <div id="anchor-status" style="font-size:0.75rem; color:var(--text-secondary); margin-top: var(--space-sm);">
@@ -617,6 +694,7 @@
       showToast('No anchor hash available for this presentation', 'error');
       return;
     }
+    const issuerWallet = presentation.credential?.issuer?.walletAddress || null;
 
     const anchorBtn = document.getElementById('anchor-onchain-btn');
     const statusEl = document.getElementById('anchor-status');
@@ -627,6 +705,18 @@
     if (statusEl) statusEl.textContent = 'Connecting to wallet...';
 
     try {
+      const holderWallet = holderWalletAddress || await connectHolderWallet(true);
+      if (!holderWallet) {
+        throw new Error('No MetaMask account connected');
+      }
+      const activeWallet = await BlockchainModule.getConnectedAddress(false);
+      if (!activeWallet || !BlockchainModule.addressesEqual(activeWallet, holderWallet)) {
+        throw new Error(`MetaMask active account is ${activeWallet || 'not connected'}. Switch to selected Student wallet ${holderWallet} and retry.`);
+      }
+      if (issuerWallet && BlockchainModule.addressesEqual(holderWallet, issuerWallet)) {
+        throw new Error('Issuer and Student wallets must be different. Switch MetaMask to student account and retry.');
+      }
+
       const res = await BlockchainModule.anchorHash(hash);
       Store.updatePresentationByCode(code, (current) => ({
         ...current,
@@ -636,6 +726,7 @@
           txHash: res.txHash,
           anchorTime: res.anchorTime,
           anchoredAt: new Date().toISOString(),
+          holderWalletAddress: res.from || holderWallet,
         },
       }));
 
@@ -751,6 +842,7 @@
 
   // ── Event Listeners ─────────────────────────────────────────────
   document.getElementById('btn-claim').addEventListener('click', claimCredentials);
+  document.getElementById('btn-connect-holder-wallet').addEventListener('click', () => connectHolderWallet(true));
   document.getElementById('claim-enrollment-id').addEventListener('keydown', e => {
     if (e.key === 'Enter') claimCredentials();
   });
@@ -796,6 +888,8 @@
   }
 
   // ── Init ────────────────────────────────────────────────────────
+  loadHolderWalletSelection();
+  renderHolderWallet();
   renderWalletCards();
   renderPresentations();
 })();

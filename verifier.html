@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Verifier Portal — Verify student credentials cryptographically. Check issuer signatures and ZKP range proofs.">
   <title>Verifier Portal — CredChain Verify</title>
-  <link rel="stylesheet" href="css/style.css?v=20260328-3">
+  <link rel="stylesheet" href="css/style.css?v=20260328-4">
 </head>
 <body>
 
@@ -47,6 +47,7 @@
           <li style="margin-bottom: 4px;">⛔ <strong style="color:var(--text-secondary);">Revocation check</strong> — Has the issuer revoked the credential?</li>
           <li style="margin-bottom: 4px;">🔄 <strong style="color:var(--text-secondary);">Replay detection</strong> — Has this presentation been used before?</li>
           <li style="margin-bottom: 4px;">⛓️ <strong style="color:var(--text-secondary);">Blockchain anchor</strong> — Is the presentation hash anchored on-chain?</li>
+          <li style="margin-bottom: 4px;">👥 <strong style="color:var(--text-secondary);">Role separation</strong> — Are issuer and student different wallets?</li>
           <li style="margin-bottom: 4px;">🧮 <strong style="color:var(--text-secondary);">ZKP proofs</strong> — Are the range claims mathematically valid?</li>
         </ul>
         <div class="claim-bar">
@@ -87,13 +88,13 @@
   <!-- Toast Container -->
   <div class="toast-container" id="toast-container"></div>
 
-  <script src="js/snarkjs.min.js?v=20260328-3"></script>
+  <script src="js/snarkjs.min.js?v=20260328-4"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.1/dist/ethers.umd.min.js"></script>
-  <script src="js/state.js?v=20260328-3"></script>
-  <script src="js/crypto.js?v=20260328-3"></script>
-  <script src="js/store.js?v=20260328-3"></script>
-  <script src="js/data.js?v=20260328-3"></script>
-  <script src="js/blockchain.js?v=20260328-3"></script>
-  <script src="js/verifier.js?v=20260328-3"></script>
+  <script src="js/state.js?v=20260328-4"></script>
+  <script src="js/crypto.js?v=20260328-4"></script>
+  <script src="js/store.js?v=20260328-4"></script>
+  <script src="js/data.js?v=20260328-4"></script>
+  <script src="js/blockchain.js?v=20260328-4"></script>
+  <script src="js/verifier.js?v=20260328-4"></script>
 </body>
 </html>
