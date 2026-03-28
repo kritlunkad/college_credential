@@ -1,5 +1,6 @@
 # CredChain
 # Visit and Exprience : https://college-credential.vercel.app/
+# Live Demo : https://youtu.be/YiGT0Kw24JM
 
 Privacy-first academic credential issuance, sharing, and verification with:
 - Verifiable Credentials (W3C-style JSON)
@@ -52,6 +53,8 @@ CredChain lets a college issue signed credentials, students share only required 
 | TrustlessIDRegistry.sol  |
 +--------------------------+
 ```
+<img width="2932" height="1440" alt="image" src="https://github.com/user-attachments/assets/a3885901-53c1-42b3-8bcd-3e9cb05ad177" />
+
 
 ## End-to-End Flow
 ```text
@@ -70,6 +73,7 @@ Verifier -> enter/scan code -> fetch VP -> run checks -> verdict
 5) Anchor (optional)
 Student -> anchor credential hash on Polygon -> verifier confirms on-chain
 ```
+<img width="1280" height="815" alt="image" src="https://github.com/user-attachments/assets/6a5d7c39-fb2e-4dca-8972-f1334d7d3651" />
 
 ## Detailed Verification Checks
 The verifier currently evaluates:
