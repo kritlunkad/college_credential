@@ -36,6 +36,20 @@ const BlockchainModule = (() => {
     return typeof ethers !== 'undefined';
   }
 
+  function getInjectedProvider() {
+    if (typeof window === 'undefined') return null;
+    const eth = window.ethereum;
+    if (!eth) return null;
+    if (Array.isArray(eth.providers) && eth.providers.length > 0) {
+      return eth.providers.find((p) => p && p.isMetaMask) || eth.providers[0];
+    }
+    return eth;
+  }
+
+  function hasWalletProvider() {
+    return !!getInjectedProvider();
+  }
+
   function normalizeAddress(addr) {
     return typeof addr === 'string' ? addr.trim().toLowerCase() : '';
   }
@@ -109,12 +123,13 @@ const BlockchainModule = (() => {
   }
 
   async function getConnectedAddress(requestAccess = true) {
-    if (!window.ethereum) return null;
+    const provider = getInjectedProvider();
+    if (!provider) return null;
     if (requestAccess) {
-      const acc = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const acc = await provider.request({ method: 'eth_requestAccounts' });
       return acc && acc[0] ? acc[0] : null;
     }
-    const acc = await window.ethereum.request({ method: 'eth_accounts' });
+    const acc = await provider.request({ method: 'eth_accounts' });
     return acc && acc[0] ? acc[0] : null;
   }
 
@@ -144,10 +159,11 @@ const BlockchainModule = (() => {
   async function anchorHash(hash) {
     if (!isConfigured()) throw new Error('Contract address is not configured');
     if (!hasEthers()) throw new Error('ethers.js not loaded');
-    if (!window.ethereum) throw new Error('MetaMask not detected');
+    const injected = getInjectedProvider();
+    if (!injected) throw new Error('MetaMask not detected');
 
     const cfg = getConfig();
-    const provider = new ethers.BrowserProvider(window.ethereum);
+    const provider = new ethers.BrowserProvider(injected);
     await provider.send('eth_requestAccounts', []);
     await ensureWalletNetwork(provider);
 
@@ -211,6 +227,8 @@ const BlockchainModule = (() => {
     isConfigured,
     normalizeAddress,
     addressesEqual,
+    hasWalletProvider,
+    getInjectedProvider,
     getConnectedAddress,
     getExplorerTxUrl,
     getCredentialAnchorPayload,

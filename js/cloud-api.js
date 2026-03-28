@@ -22,7 +22,12 @@ const CloudApi = (() => {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      throw new Error(data.error || `API request failed: ${res.status}`);
+      const isApi404 = res.status === 404 && String(path || '').startsWith('/api/');
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+      const hint = isApi404
+        ? ` (API route not found on ${origin}. Run \`npx vercel dev\` and open the app from the same origin.)`
+        : '';
+      throw new Error(data.error || `API request failed: ${res.status}${hint}`);
     }
     return data;
   }

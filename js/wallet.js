@@ -14,8 +14,8 @@
   const cloudAuthEnabled = !!window.FIREBASE_CONFIG?.apiKey;
 
   // ZKP artifacts paths
-  const ZKP_WASM = 'zkp/gpa_range_proof.wasm';
-  const ZKP_ZKEY = 'zkp/gpa_range_proof.zkey';
+  const ZKP_WASM = '/zkp/gpa_range_proof.wasm';
+  const ZKP_ZKEY = '/zkp/gpa_range_proof.zkey';
 
   function formatAddress(addr) {
     if (!addr || typeof addr !== 'string') return '—';
@@ -61,8 +61,8 @@
       if (requestAccess) showToast('Blockchain module not loaded', 'error');
       return null;
     }
-    if (!window.ethereum) {
-      if (requestAccess) showToast('MetaMask not detected', 'error');
+    if (!BlockchainModule.hasWalletProvider()) {
+      if (requestAccess) showToast('MetaMask not detected. Enable extension for this site and reload.', 'error');
       return null;
     }
     try {
@@ -99,8 +99,9 @@
       return;
     }
     try {
-      await CloudAuth.signInStudentGoogle();
-      showToast('Student login successful', 'success');
+      const user = await CloudAuth.signInStudentGoogle();
+      if (user) showToast('Student login successful', 'success');
+      else showToast('Redirecting to Google sign-in...', 'info');
     } catch (e) {
       showToast(`Student login failed: ${e.message}`, 'error');
     }
@@ -775,7 +776,7 @@
     body.innerHTML = `
       <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--space-lg);">
         Share this code or QR with the verifier. They can verify it on the
-        <a href="verifier.html" style="color: var(--accent-indigo-light);">Verifier Portal</a>.
+        <a href="/verifier.html" style="color: var(--accent-indigo-light);">Verifier Portal</a>.
       </p>
       <div class="verification-code-display" id="vcode-display" title="Click to copy">${code}</div>
       <div class="qr-container" id="qr-container" style="display:flex; flex-direction:column; align-items:center;">
@@ -804,7 +805,7 @@
 
     // Generate QR code
     try {
-      const verifierUrl = `${window.location.origin}${window.location.pathname.replace('wallet.html', 'verifier.html')}?code=${code}`;
+      const verifierUrl = `${window.location.origin}/verifier.html?code=${code}`;
       if (typeof QRCode !== 'undefined') {
         const qrContainer = document.getElementById('qr-canvas');
         qrContainer.innerHTML = ''; // Clear previous
@@ -1009,14 +1010,26 @@
   }
 
   // ── Event Listeners ─────────────────────────────────────────────
-  document.getElementById('btn-claim').addEventListener('click', claimCredentials);
-  document.getElementById('btn-claim-code').addEventListener('click', claimByCode);
-  document.getElementById('btn-connect-holder-wallet').addEventListener('click', () => connectHolderWallet(true));
-  document.getElementById('btn-student-login').addEventListener('click', studentLogin);
-  document.getElementById('btn-student-logout').addEventListener('click', studentLogout);
+  const bindClick = (id, handler) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', handler);
+  };
+  const bindEnter = (id, handler) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handler();
+    });
+  };
+
+  bindClick('btn-claim', claimCredentials);
+  bindClick('btn-claim-code', claimByCode);
+  bindClick('btn-connect-holder-wallet', () => connectHolderWallet(true));
+  bindClick('btn-student-login', studentLogin);
+  bindClick('btn-student-logout', studentLogout);
   const navLogoutBtn = document.getElementById('nav-logout-btn');
   if (navLogoutBtn) navLogoutBtn.addEventListener('click', studentLogout);
-  document.getElementById('btn-student-biometric').addEventListener('click', async () => {
+  bindClick('btn-student-biometric', async () => {
     if (typeof BiometricAuth === 'undefined') {
       showToast('Biometric module not loaded', 'error');
       return;
@@ -1028,28 +1041,27 @@
       showToast(`Biometric enrollment failed: ${e.message}`, 'error');
     }
   });
-  document.getElementById('claim-enrollment-id').addEventListener('keydown', e => {
-    if (e.key === 'Enter') claimCredentials();
-  });
-  document.getElementById('claim-code').addEventListener('keydown', e => {
-    if (e.key === 'Enter') claimByCode();
-  });
-  document.getElementById('share-modal-close').addEventListener('click', () => closeModal('share-modal'));
-  document.getElementById('share-modal-cancel').addEventListener('click', () => closeModal('share-modal'));
-  document.getElementById('share-modal-confirm').addEventListener('click', generatePresentation);
-  document.getElementById('result-modal-close').addEventListener('click', () => closeModal('result-modal'));
-  document.getElementById('detail-modal-close').addEventListener('click', () => closeModal('detail-modal'));
-  document.getElementById('detail-modal-dismiss').addEventListener('click', () => closeModal('detail-modal'));
+  bindEnter('claim-enrollment-id', claimCredentials);
+  bindEnter('claim-code', claimByCode);
+  bindClick('share-modal-close', () => closeModal('share-modal'));
+  bindClick('share-modal-cancel', () => closeModal('share-modal'));
+  bindClick('share-modal-confirm', generatePresentation);
+  bindClick('result-modal-close', () => closeModal('result-modal'));
+  bindClick('detail-modal-close', () => closeModal('detail-modal'));
+  bindClick('detail-modal-dismiss', () => closeModal('detail-modal'));
 
   // Close modals on overlay click
-  ['share-modal', 'result-modal', 'detail-modal'].forEach(id => {
-    document.getElementById(id).addEventListener('click', e => {
+  ['share-modal', 'result-modal', 'detail-modal'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('click', (e) => {
       if (e.target === e.currentTarget) closeModal(id);
     });
   });
 
   // Delegated click handler as a fallback for dynamically rendered cards
-  document.getElementById('wallet-cards').addEventListener('click', (e) => {
+  const walletCardsEl = document.getElementById('wallet-cards');
+  if (walletCardsEl) walletCardsEl.addEventListener('click', (e) => {
     const actionButton = e.target.closest('button[data-action][data-cred-id]');
     if (!actionButton) return;
     e.preventDefault();

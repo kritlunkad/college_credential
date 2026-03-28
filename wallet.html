@@ -763,8 +763,8 @@
 
   <nav class="nav" id="nav">
     <div class="nav-inner" style="max-width: 100%; width: 100%;">
-      <a href="index.html" class="nav-brand" style="align-items: center; gap: 10px;">
-        <img src="assets/credchain logo.png" alt="CredChain Logo"
+      <a href="/index.html" class="nav-brand" style="align-items: center; gap: 10px;">
+        <img src="/assets/credchain logo.png" alt="CredChain Logo"
           style="height: 24px; width: auto; object-fit: contain;">
         <div style="display: flex; flex-direction: column; justify-content: center;">
           <span style="line-height: 1; font-size: 1.15rem; font-weight: 700;">CredChain</span>
@@ -774,9 +774,9 @@
         </div>
       </a>
       <ul class="nav-links" style="display: flex; align-items: center; gap: 24px;">
-        <li><a href="verifier.html" class="nav-link"
+        <li><a href="/verifier.html" class="nav-link"
             style="font-size: 0.85rem; padding: 0; color: var(--text-secondary);">Verifier Portal</a></li>
-        <li><a href="college.html" class="nav-link"
+        <li><a href="/college.html" class="nav-link"
             style="font-size: 0.85rem; padding: 0; color: var(--text-secondary);">Issuer Portal</a></li>
         <li><button class="btn btn-sm" id="nav-logout-btn"
             style="border-radius: 100px; padding: 4px 14px; background: transparent; color: #e57373; border: 1px solid rgba(229, 115, 115, 0.3); font-weight: 600; font-size: 0.8rem; letter-spacing: 0.5px;">Logout</button>
@@ -832,6 +832,33 @@
       </div>
       <div id="student-auth-status" style="font-size:0.75rem; color:var(--silver); margin-top: 16px; opacity:0.6;">Not
         authenticated</div>
+    </div>
+
+    <!-- MetaMask Wallet Connection -->
+    <div class="card" style="margin-top: 20px;">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Student Wallet Connection</div>
+          <div class="card-subtitle">Connect MetaMask before anchoring presentations on-chain</div>
+        </div>
+        <div class="card-tag green">On-Chain Ready</div>
+      </div>
+      <div style="display:flex; gap: 12px; align-items:center; flex-wrap: wrap;">
+        <button class="btn btn-primary btn-sm" id="btn-connect-holder-wallet">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8"></path>
+            <path d="M16 19h6"></path>
+            <path d="M19 16v6"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          Connect MetaMask
+        </button>
+        <div id="holder-wallet-status" style="font-size:0.78rem; color:var(--text-secondary);">Not connected</div>
+      </div>
+      <div id="holder-wallet-address"
+        style="font-size:0.75rem; margin-top: 10px; color:var(--text-muted); font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', monospace; word-break: break-all;">
+        —
+      </div>
     </div>
 
     <!-- Claim Credentials -->
@@ -934,21 +961,21 @@
 
   <div class="toast-container" id="toast-container"></div>
 
-  <script src="js/qrcode.min.js?v=20260328-10"></script>
-  <script src="js/snarkjs.min.js?v=20260328-10"></script>
+  <script src="/js/qrcode.min.js?v=20260328-10"></script>
+  <script src="/js/snarkjs.min.js?v=20260328-10"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.1/dist/ethers.umd.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="js/firebase-config.js?v=20260328-10"></script>
-  <script src="js/state.js?v=20260328-10"></script>
-  <script src="js/crypto.js?v=20260328-10"></script>
-  <script src="js/store.js?v=20260328-10"></script>
-  <script src="js/data.js?v=20260328-10"></script>
-  <script src="js/blockchain.js?v=20260328-10"></script>
-  <script src="js/cloud-auth.js?v=20260328-10"></script>
-  <script src="js/cloud-api.js?v=20260328-10"></script>
-  <script src="js/biometric-auth.js?v=20260328-10"></script>
-  <script src="js/wallet.js?v=20260328-10"></script>
+  <script src="/js/firebase-config.js?v=20260328-10"></script>
+  <script src="/js/state.js?v=20260328-10"></script>
+  <script src="/js/crypto.js?v=20260328-10"></script>
+  <script src="/js/store.js?v=20260328-10"></script>
+  <script src="/js/data.js?v=20260328-10"></script>
+  <script src="/js/blockchain.js?v=20260329-02"></script>
+  <script src="/js/cloud-auth.js?v=20260329-02"></script>
+  <script src="/js/cloud-api.js?v=20260329-02"></script>
+  <script src="/js/biometric-auth.js?v=20260328-10"></script>
+  <script src="/js/wallet.js?v=20260329-02"></script>
 </body>
 
 </html>

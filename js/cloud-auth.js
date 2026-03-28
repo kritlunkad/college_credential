@@ -28,6 +28,11 @@ const CloudAuth = (() => {
       listeners.forEach((cb) => cb(currentUser));
     });
 
+    // Consume redirect sign-in results (if popup fallback used).
+    firebase.auth().getRedirectResult().catch((err) => {
+      console.warn('[CloudAuth] Redirect sign-in result error:', err?.message || err);
+    });
+
     initialized = true;
   }
 
@@ -44,7 +49,18 @@ const CloudAuth = (() => {
   async function signInStudentGoogle() {
     ensureInit();
     const provider = new firebase.auth.GoogleAuthProvider();
-    await firebase.auth().signInWithPopup(provider);
+    try {
+      await firebase.auth().signInWithPopup(provider);
+    } catch (err) {
+      const msg = String(err?.message || '').toLowerCase();
+      const shouldFallbackToRedirect =
+        err?.code === 'auth/popup-blocked' ||
+        msg.includes('cross-origin-opener-policy') ||
+        msg.includes('window.closed');
+      if (!shouldFallbackToRedirect) throw err;
+      await firebase.auth().signInWithRedirect(provider);
+      return null;
+    }
     return firebase.auth().currentUser;
   }
 

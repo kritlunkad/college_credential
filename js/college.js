@@ -197,8 +197,8 @@
       if (requestAccess) showToast('Blockchain module not loaded', 'error');
       return null;
     }
-    if (!window.ethereum) {
-      if (requestAccess) showToast('MetaMask not detected', 'error');
+    if (!BlockchainModule.hasWalletProvider()) {
+      if (requestAccess) showToast('MetaMask not detected. Enable extension for this site and reload.', 'error');
       return null;
     }
 
