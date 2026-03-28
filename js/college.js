@@ -103,17 +103,21 @@
 
   function renderIssuerWallet() {
     const statusEl = document.getElementById('issuer-wallet-status');
+    const dotEl = statusEl?.querySelector('.dot');
+    const labelEl = statusEl?.querySelector('span:not(.dot)');
     const addressEl = document.getElementById('issuer-wallet-address');
     if (!statusEl || !addressEl) return;
 
     if (issuerWalletAddress) {
-      statusEl.textContent = `Connected: ${formatAddress(issuerWalletAddress)}`;
-      statusEl.style.color = 'var(--accent-green-light)';
+      if (dotEl) dotEl.className = 'dot';
+      if (labelEl) labelEl.textContent = 'Active Engine';
       addressEl.textContent = issuerWalletAddress;
+      addressEl.style.color = 'var(--bone)';
     } else {
-      statusEl.textContent = 'Not connected';
-      statusEl.style.color = 'var(--text-secondary)';
-      addressEl.textContent = '—';
+      if (dotEl) dotEl.className = 'dot inactive';
+      if (labelEl) labelEl.textContent = 'Disconnected';
+      addressEl.textContent = 'Not connected to engine';
+      addressEl.style.color = 'var(--silver)';
     }
   }
 
@@ -192,8 +196,8 @@
       const issuerName = document.getElementById('issuer-name').value.trim();
       Store.savePublicKey(issuerName, publicKeyJwk);
 
-      statusEl.classList.add('active');
-      statusText.textContent = `Key pair active — ECDSA P-256 · Public key registered for ${issuerName}`;
+      if (statusEl) statusEl.classList.add('active');
+      if (statusText) statusText.textContent = `Key pair active — ECDSA P-256 · Public key registered for ${issuerName}`;
 
       Store.appendAuditLog({
         event: 'key_generated',
@@ -201,8 +205,8 @@
         details: `ECDSA P-256 key pair initialized for ${issuerName}`,
       });
     } catch (e) {
-      statusEl.style.color = 'var(--accent-red)';
-      statusText.textContent = 'Failed to initialize keys: ' + e.message;
+      if (statusEl) statusEl.style.color = 'var(--accent-red)';
+      if (statusText) statusText.textContent = 'Failed to initialize keys: ' + e.message;
       console.error(e);
     }
   }
@@ -452,9 +456,26 @@
   }
 
   // ── Render issued credentials ───────────────────────────────────
-  function renderIssuedList() {
+  function renderIssuedList(filterTerm = '') {
     const container = document.getElementById('issued-list');
-    const credentials = Store.getAllCredentials();
+    const searchInfo = document.getElementById('search-info');
+    const searchQuery = document.getElementById('search-query');
+    let credentials = Store.getAllCredentials();
+
+    if (filterTerm) {
+      const term = filterTerm.toLowerCase();
+      credentials = credentials.filter(c => 
+        c.credentialSubject.name.toLowerCase().includes(term) ||
+        c.credentialSubject.enrollmentId.toLowerCase().includes(term) ||
+        c.id.toLowerCase().includes(term)
+      );
+      if (searchInfo && searchQuery) {
+        searchInfo.style.display = 'block';
+        searchQuery.textContent = filterTerm;
+      }
+    } else if (searchInfo) {
+      searchInfo.style.display = 'none';
+    }
 
     if (credentials.length === 0) {
       container.innerHTML = `
@@ -635,9 +656,16 @@
     }
   });
 
+  const searchInput = document.getElementById('search-credentials');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      renderIssuedList(e.target.value.trim());
+    });
+  }
+
   // Reactive updates
-  StateManager.on('credential:issued', () => { renderIssuedList(); renderStats(); });
-  StateManager.on('store:updated', () => { renderIssuedList(); renderStats(); renderAuditLog(); });
+  StateManager.on('credential:issued', () => { renderIssuedList(searchInput?.value); renderStats(); });
+  StateManager.on('store:updated', () => { renderIssuedList(searchInput?.value); renderStats(); renderAuditLog(); });
   StateManager.enableCrossTabSync();
 
   // ── Init ────────────────────────────────────────────────────────

@@ -137,6 +137,7 @@
     .gradient-text {
       background: linear-gradient(to right, #fff, #888);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
@@ -223,11 +224,26 @@
       transition: all 0.3s var(--ease);
     }
 
-    .form-input:focus, .form-select:focus {
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
       outline: none;
       border-color: rgba(255, 255, 255, 0.3);
       background: rgba(255, 255, 255, 0.06);
     }
+
+    .form-textarea {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--ghost-border);
+      color: var(--bone);
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      transition: all 0.3s var(--ease);
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .form-group.full-width { grid-column: 1 / -1; }
+    .required { color: #f87171; margin-left: 2px; }
 
     /* ── Buttons ───────────────────────────────────────────── */
     .btn {
@@ -299,39 +315,137 @@
       text-align: center;
     }
 
-    .stat-value { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
-    .stat-label { font-size: 0.75rem; color: var(--silver); text-transform: uppercase; letter-spacing: 1px; }
+    .stat-value { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; color: var(--accent); }
+    .stat-label { font-size: 0.75rem; color: var(--silver); text-transform: uppercase; letter-spacing: 1px; opacity: 0.6; }
 
-    .section-title { font-size: 1.3rem; margin-bottom: 24px; letter-spacing: -0.5px; }
-
-    /* ── Tables ────────────────────────────────────────────── */
-    .audit-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.85rem;
-    }
-
-    .audit-table th {
-      text-align: left;
-      padding: 16px;
+    /* ── Type Options ──────────────────────────────────────── */
+    #type-selector { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; }
+    
+    /* ── Type Options ──────────────────────────────────────── */
+    #type-selector { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; }
+    
+    .type-option {
+      background: var(--ghost);
+      border: 1px solid var(--ghost-border);
       color: var(--silver);
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 0.9rem;
       font-weight: 600;
-      border-bottom: 1px solid var(--ghost-border);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.3s var(--ease);
+      appearance: none;
+      -webkit-appearance: none;
+      outline: none;
+      margin: 0;
     }
 
-    .audit-table td {
-      padding: 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    .type-option:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: var(--bone);
+      transform: translateY(-2px);
     }
 
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--silver);
-      opacity: 0.6;
+    .type-option.selected {
+      background: var(--bone);
+      color: var(--obsidian);
+      border-color: var(--bone);
+      box-shadow: 0 10px 25px rgba(255, 255, 255, 0.1);
     }
 
-    .empty-state-icon { font-size: 2rem; margin-bottom: 12px; }
+    .type-option svg {
+      opacity: 0.7;
+      transition: opacity 0.3s var(--ease);
+      display: block;
+    }
+
+    .type-option.selected svg {
+      opacity: 1;
+      color: var(--obsidian);
+    }
+
+    .section-title { font-size: 1.3rem; margin-bottom: 24px; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
+
+    /* ── Generated Dashboard Items ────────────────────────── */
+    #issued-list { display: flex; flex-direction: column; gap: 12px; }
+    
+    .credential-mini {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--ghost-border);
+      padding: 16px 20px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.3s var(--ease);
+    }
+    
+    .credential-mini:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateX(4px);
+    }
+
+    .credential-mini-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .credential-mini-info { flex: 1; min-width: 0; }
+    .credential-mini-title { font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .credential-mini-sub { font-size: 0.75rem; color: var(--silver); opacity: 0.6; margin-top: 2px; }
+
+    .badge {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-valid { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+    .badge-revoked, .badge-failed { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .badge-expiring { background: rgba(234, 179, 8, 0.15); color: #fbbf24; }
+
+    /* ── Audit Log ────────────────────────────────────────── */
+    .audit-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .audit-table th { text-align: left; padding: 12px 16px; color: var(--silver); font-weight: 600; border-bottom: 1px solid var(--ghost-border); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+    .audit-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.03); color: var(--silver); }
+    
+    .audit-event {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .audit-event.issued { background: rgba(34, 197, 94, 0.1); color: #4ade80; }
+    .audit-event.revoked { background: rgba(239, 68, 68, 0.1); color: #f87171; }
+    .audit-event.key_generated { background: rgba(168, 85, 247, 0.1); color: #c084fc; }
+
+    .btn-danger { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+    .btn-danger:hover { background: #ef4444; color: white; }
+
+    .toast-container { position: fixed; bottom: 32px; right: 32px; z-index: 2000; display: flex; flex-direction: column; gap: 12px; }
+    .toast {
+      background: #0A0A0A; border: 1px solid var(--ghost-border); color: var(--bone);
+      padding: 12px 20px; border-radius: 12px; font-size: 0.85rem; min-width: 240px;
+      display: flex; align-items: center; gap: 12px; backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      animation: slideIn 0.3s var(--ease);
+    }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideOut { to { transform: translateX(100%); opacity: 0; } }
 
     /* ── Responsive ────────────────────────────────────────── */
     @media (max-width: 768px) {
@@ -346,11 +460,7 @@
 
   <header class="app-header">
     <div class="app-brand">
-      <div class="app-brand-icon">
-        <svg width="20" height="20" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M50 25 C35 30, 25 40, 25 52 C25 68, 38 78, 50 82 C62 78, 75 68, 75 52 C75 40, 65 30, 50 25Z" stroke="currentColor" stroke-width="8" fill="none"/>
-        </svg>
-      </div>
+      <img src="assets/trustlessid logo.png" alt="TrustlessID Logo" style="height: 26px; width: auto; object-fit: contain; margin-right: 4px;">
       <div>
         <div class="app-brand-name">CredChain</div>
         <div class="app-brand-sub">Issuer Portal</div>
@@ -393,7 +503,7 @@
           <div class="card-title">Authentication</div>
           <div class="card-subtitle">Secure administrative access</div>
         </div>
-        <div class="card-tag greens">Security</div>
+        <div class="card-tag" style="background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2);">Security</div>
       </div>
       <div style="display:flex; gap: 12px; flex-wrap: wrap; align-items:center;">
         <input type="email" class="form-input" id="admin-email" placeholder="admin@college.edu" style="max-width:240px;">
@@ -410,39 +520,31 @@
       </div>
     </div>
 
-    <!-- Key Status & Wallet -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
-      <div class="card" style="margin-bottom: 0;">
-        <div class="card-title">Signature System</div>
-        <div id="key-status" class="status-indicator" style="margin-top: 12px;">
-          <span class="dot"></span>
-          <span id="key-status-text">Initializing...</span>
+    <!-- MetaMask Connection Card -->
+    <div class="card" style="margin-bottom: 32px; padding: 32px 40px; border-color: rgba(255, 255, 255, 0.1);">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px;">
+        <div>
+          <div class="card-title" style="font-size: 1.25rem;">Blockchain Identity Engine</div>
+          <div class="card-subtitle" style="font-size: 0.9rem;">Anchoring credentials to Polygon Amoy for immutability.</div>
+          <div id="issuer-wallet-address" style="margin-top: 12px; font-size: 0.95rem; color: var(--accent); opacity: 0.9; font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', monospace; letter-spacing: -0.2px;">
+            Not connected to engine
+          </div>
         </div>
-      </div>
-      <div class="card" style="margin-bottom: 0; padding: 24px;">
-        <div class="card-title" style="font-size: 0.9rem;">Blockchain Anchor</div>
-        <div style="display:flex; gap: 8px; align-items:center; margin-top: 12px;">
-          <button class="btn btn-secondary btn-sm" id="btn-connect-issuer-wallet">Connect MetaMask</button>
-          <span id="issuer-wallet-status" style="font-size:11px; color:var(--silver);">Disconnected</span>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 12px;">
+          <button class="btn btn-primary" id="btn-connect-issuer-wallet" style="padding: 14px 32px; font-size: 1rem;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7"></path><path d="M16 19h6"></path><path d="M19 16v6"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            Connect MetaMask
+          </button>
+          <div id="issuer-wallet-status" class="status-indicator">
+            <span class="dot inactive"></span>
+            <span style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Disconnected</span>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Stats -->
-    <div class="stats-row" id="stats-row">
-      <div class="stat-card">
-        <div class="stat-value" id="stat-total">0</div>
-        <div class="stat-label">Issued</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="stat-claimed">0</div>
-        <div class="stat-label">Claimed</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="stat-revoked">0</div>
-        <div class="stat-label">Revoked</div>
-      </div>
-    </div>
+    <!-- Stats Row moved to Dashboard -->
+
 
     <!-- Issue Section -->
     <div id="issue-section">
@@ -468,16 +570,25 @@
             <input type="number" class="form-input" id="expiry-days" value="365">
           </div>
           <div class="form-group">
-            <label class="form-label">Student Email</label>
+            <label class="form-label">Issuer DID</label>
+            <input type="text" class="form-input" id="issuer-did" value="did:web:shivnadar.university" readonly style="opacity:0.5;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Student Email (Cloud Mode)</label>
             <input type="email" class="form-input" id="assigned-student-email" placeholder="student@university.edu">
           </div>
           <div class="form-group">
             <label class="form-label">Document Type</label>
             <select class="form-select" id="source-doc-type">
+              <option value="">None</option>
               <option value="Transcript">Transcript</option>
               <option value="Degree">Degree Certificate</option>
               <option value="Enrollment Letter">Enrollment Letter</option>
             </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Upload Evidence</label>
+            <input type="file" class="form-input" id="source-doc-file" accept=".pdf,.png,.jpg,.jpeg">
           </div>
         </div>
       </div>
@@ -494,27 +605,60 @@
 
     <!-- Dashboard Section -->
     <div id="dashboard-section" style="display:none;">
-      <h2 class="section-title">Issued Credentials</h2>
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 32px;">
+        <div>
+          <h2 class="section-title">Institutional Dashboard</h2>
+          <p class="card-subtitle">Overview of all issued academic records and their verification status.</p>
+        </div>
+        <div style="display:flex; gap: 12px;">
+           <input type="text" class="form-input" id="search-credentials" placeholder="Search by name or ID..." style="min-width: 260px; padding: 8px 16px;">
+        </div>
+      </div>
+
+      <!-- Stats Moved Here -->
+      <div class="stats-row" id="stats-row">
+        <div class="stat-card" style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);">
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-label">Total Issued</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, rgba(34,197,94,0.05) 0%, rgba(34,197,94,0.01) 100%);">
+          <div class="stat-value" id="stat-claimed" style="color: #4ade80;">0</div>
+          <div class="stat-label">Successfully Claimed</div>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, rgba(239,68,68,0.05) 0%, rgba(239,68,68,0.01) 100%);">
+          <div class="stat-value" id="stat-revoked" style="color: #f87171;">0</div>
+          <div class="stat-label">Revoked Records</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding: 24px; border-style: dashed; opacity: 0.8; margin-bottom: 24px; display: none;" id="search-info">
+        <div style="font-size: 0.85rem; color: var(--silver);">Showing results for "<span id="search-query"></span>"</div>
+      </div>
+
       <div id="issued-list"></div>
     </div>
 
     <!-- Audit Section -->
     <div id="audit-section" style="display:none;">
-      <h2 class="section-title">Audit Log</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
+        <h2 class="section-title">Audit Engine Log</h2>
+        <button class="btn btn-secondary btn-sm" id="btn-export-log">Export JSON</button>
+      </div>
       <div class="card" style="padding: 0; overflow: hidden;">
         <table class="audit-table">
           <thead>
             <tr>
-              <th>Time</th>
-              <th>Event</th>
+              <th>Timestamp</th>
+              <th>Action</th>
               <th>Details</th>
+              <th>Actor</th>
             </tr>
           </thead>
           <tbody id="audit-body"></tbody>
         </table>
         <div id="audit-empty" class="empty-state">
-          <div class="empty-state-icon">📋</div>
-          <div>No events logged</div>
+          <div class="empty-state-icon">📜</div>
+          <div>The audit trail is currently empty.</div>
         </div>
       </div>
     </div>
