@@ -1,6 +1,6 @@
 # CredChain
 # Visit and Exprience : https://college-credential.vercel.app/
-# Live Demo : https://youtu.be/YiGT0Kw24JM
+# Demo Video : https://youtu.be/4tGldZC9Xik
 
 Privacy-first academic credential issuance, sharing, and verification with:
 - Verifiable Credentials (W3C-style JSON)
