@@ -428,15 +428,19 @@
         return;
       }
 
-      // Build Verifiable Presentation
-      const verificationCode = CryptoModule.generateVerificationCode();
+      // Reuse one presentation code per credential so selective re-sharing
+      // updates the same share identity instead of minting new codes each time.
+      const existingPresentation = Store.getLatestPresentationByCredentialId(cred.id);
+      const verificationCode = existingPresentation?.verificationCode || CryptoModule.generateVerificationCode();
       const nonce = CryptoModule.generateNonce();
+      const nowIso = new Date().toISOString();
 
       const presentation = {
         '@context': ['https://www.w3.org/2018/credentials/v1'],
         type: ['VerifiablePresentation'],
         verificationCode: verificationCode,
-        created: new Date().toISOString(),
+        created: existingPresentation?.created || nowIso,
+        updatedAt: nowIso,
         nonce: nonce,
         usedAt: null,
         credential: {
@@ -453,18 +457,49 @@
         },
       };
 
-      Store.savePresentation(presentation);
+      if (typeof BlockchainModule !== 'undefined') {
+        const cfg = BlockchainModule.getConfig();
+        try {
+          const anchorHash = existingPresentation?.blockchain?.anchorHash
+            || await BlockchainModule.computeCredentialHashFromPresentation(presentation);
+          presentation.blockchain = {
+            chainId: cfg.CHAIN_ID,
+            network: cfg.NETWORK_NAME,
+            contractAddress: cfg.CONTRACT_ADDRESS,
+            anchorHash,
+            anchored: existingPresentation?.blockchain?.anchored || false,
+            txHash: existingPresentation?.blockchain?.txHash || null,
+            anchorTime: existingPresentation?.blockchain?.anchorTime || null,
+            anchoredAt: existingPresentation?.blockchain?.anchoredAt || null,
+          };
+        } catch (e) {
+          console.error('[Blockchain] Failed to compute anchor hash:', e);
+          presentation.blockchain = {
+            chainId: cfg.CHAIN_ID,
+            network: cfg.NETWORK_NAME,
+            contractAddress: cfg.CONTRACT_ADDRESS,
+            anchorHash: null,
+            anchored: existingPresentation?.blockchain?.anchored || false,
+            txHash: existingPresentation?.blockchain?.txHash || null,
+            anchorTime: existingPresentation?.blockchain?.anchorTime || null,
+            anchoredAt: existingPresentation?.blockchain?.anchoredAt || null,
+            error: e.message,
+          };
+        }
+      }
+
+      Store.saveOrReplacePresentationForCredential(cred.id, presentation);
       Store.appendAuditLog({
         event: 'shared',
         actor: 'Student Wallet',
-        details: `Presentation created for ${cred.type[1]} — Code: ${verificationCode} — Fields: ${Object.keys(selectedFields).join(', ')}${Object.keys(zkpProofs).length > 0 ? ' + ZKP(Groth16): ' + Object.keys(zkpProofs).join(', ') : ''}`,
+        details: `Presentation ${existingPresentation ? 'updated' : 'created'} for ${cred.type[1]} — Code: ${verificationCode} — Fields: ${Object.keys(selectedFields).join(', ')}${Object.keys(zkpProofs).length > 0 ? ' + ZKP(Groth16): ' + Object.keys(zkpProofs).join(', ') : ''}`,
         credentialId: cred.id,
       });
 
       closeModal('share-modal');
       showPresentationResult(verificationCode, presentation);
       renderPresentations();
-      showToast('Presentation generated with real Groth16 proof!', 'success');
+      showToast(existingPresentation ? 'Presentation updated' : 'Presentation generated with real Groth16 proof!', 'success');
     } catch (err) {
       console.error('[ZKP] Error generating proof:', err);
       showToast('Error generating ZKP proof: ' + err.message, 'error');
@@ -486,6 +521,20 @@
         }).join('')
       : '';
 
+    const blockchain = presentation.blockchain || {};
+    const canAnchor = typeof BlockchainModule !== 'undefined' && BlockchainModule.isConfigured() && !!blockchain.anchorHash;
+    const anchorState = blockchain.anchored
+      ? `✅ Anchored on ${blockchain.network || 'chain'}`
+      : canAnchor
+        ? 'Not anchored yet'
+        : 'Blockchain contract not configured';
+    const anchorButton = canAnchor
+      ? `<button class="btn ${blockchain.anchored ? 'btn-ghost' : 'btn-primary'}" id="anchor-onchain-btn" ${blockchain.anchored ? 'disabled' : ''}>${blockchain.anchored ? '✅ Anchored' : '⬡ Anchor On-Chain'}</button>`
+      : '';
+    const txInfo = blockchain.txHash
+      ? `<br><span style="font-size:0.72rem; color:var(--text-muted);">Tx: ${blockchain.txHash.substring(0, 18)}...</span>`
+      : '';
+
     body.innerHTML = `
       <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--space-lg);">
         Share this code or QR with the verifier. They can verify it on the
@@ -500,6 +549,16 @@
         Fields shared: ${Object.keys(presentation.credential.disclosedFields).join(', ') || 'None (ZKP only)'}
         ${zkpInfo}
       </p>
+      <div class="card" style="text-align:left; margin-top: var(--space-lg); padding: var(--space-md);">
+        <div style="font-size:0.8rem; font-weight:600; margin-bottom: var(--space-xs);">Blockchain Anchor (Polygon Amoy)</div>
+        <div style="font-size:0.72rem; color:var(--text-muted); word-break:break-all; margin-bottom: var(--space-sm);">
+          Hash: ${blockchain.anchorHash || 'Unavailable'}
+        </div>
+        ${anchorButton}
+        <div id="anchor-status" style="font-size:0.75rem; color:var(--text-secondary); margin-top: var(--space-sm);">
+          ${anchorState}${txInfo}
+        </div>
+      </div>
     `;
 
     // Generate QR code
@@ -532,7 +591,90 @@
       showToast('Code copied!', 'info');
     });
 
+    const anchorBtn = document.getElementById('anchor-onchain-btn');
+    if (anchorBtn && !blockchain.anchored) {
+      anchorBtn.addEventListener('click', async () => {
+        await anchorPresentationOnChain(code);
+      });
+    }
+
     openModal('result-modal');
+  }
+
+  async function anchorPresentationOnChain(code) {
+    if (typeof BlockchainModule === 'undefined') {
+      showToast('Blockchain module not loaded', 'error');
+      return;
+    }
+
+    const presentation = Store.getPresentationByCode(code);
+    if (!presentation) {
+      showToast('Presentation not found', 'error');
+      return;
+    }
+    const hash = presentation.blockchain?.anchorHash;
+    if (!hash) {
+      showToast('No anchor hash available for this presentation', 'error');
+      return;
+    }
+
+    const anchorBtn = document.getElementById('anchor-onchain-btn');
+    const statusEl = document.getElementById('anchor-status');
+    if (anchorBtn) {
+      anchorBtn.disabled = true;
+      anchorBtn.textContent = '⏳ Anchoring...';
+    }
+    if (statusEl) statusEl.textContent = 'Connecting to wallet...';
+
+    try {
+      const res = await BlockchainModule.anchorHash(hash);
+      Store.updatePresentationByCode(code, (current) => ({
+        ...current,
+        blockchain: {
+          ...(current.blockchain || {}),
+          anchored: true,
+          txHash: res.txHash,
+          anchorTime: res.anchorTime,
+          anchoredAt: new Date().toISOString(),
+        },
+      }));
+
+      if (statusEl) {
+        statusEl.innerHTML = `✅ Anchored on-chain${res.txHash ? `<br><span style="font-size:0.72rem; color:var(--text-muted);">Tx: ${res.txHash.substring(0, 18)}...</span>` : ''}`;
+      }
+      if (anchorBtn) {
+        anchorBtn.textContent = '✅ Anchored';
+        anchorBtn.className = 'btn btn-ghost';
+      }
+      renderPresentations();
+      showToast('Presentation hash anchored on Polygon Amoy', 'success');
+    } catch (e) {
+      const msg = e?.reason || e?.message || 'Anchor transaction failed';
+      const alreadyAnchored = typeof msg === 'string' && msg.toLowerCase().includes('already anchored');
+      if (alreadyAnchored) {
+        Store.updatePresentationByCode(code, (current) => ({
+          ...current,
+          blockchain: {
+            ...(current.blockchain || {}),
+            anchored: true,
+            anchoredAt: current.blockchain?.anchoredAt || new Date().toISOString(),
+          },
+        }));
+        if (statusEl) statusEl.textContent = 'ℹ️ Hash already anchored on-chain';
+        if (anchorBtn) {
+          anchorBtn.textContent = '✅ Anchored';
+          anchorBtn.className = 'btn btn-ghost';
+        }
+        showToast('Hash already anchored on-chain', 'info');
+      } else {
+        if (statusEl) statusEl.textContent = `❌ ${msg}`;
+        if (anchorBtn) {
+          anchorBtn.disabled = false;
+          anchorBtn.textContent = '⬡ Anchor On-Chain';
+        }
+        showToast(`Blockchain anchor failed: ${msg}`, 'error');
+      }
+    }
   }
 
   // ── Render Presentations List ───────────────────────────────────
@@ -555,6 +697,7 @@
       const typeInfo = getCredentialTypeInfo(typeKey) || { icon: '📄', label: typeKey, color: '#666' };
       const wasUsed = !!p.usedAt;
       const hasZkp = Object.keys(p.credential.zkpProofs || {}).length > 0;
+      const isAnchored = !!p.blockchain?.anchored;
 
       const item = document.createElement('div');
       item.className = 'credential-mini fade-in';
@@ -567,6 +710,7 @@
             ${typeInfo.label}
             <span class="badge ${wasUsed ? 'badge-replay' : 'badge-valid'}">${wasUsed ? '⚡ Used' : '🟢 Active'}</span>
             ${hasZkp ? '<span class="zkp-badge">ZKP Groth16</span>' : ''}
+            ${isAnchored ? '<span class="badge badge-verified">⛓️ Anchored</span>' : ''}
           </div>
           <div class="credential-mini-sub">
             Code: <strong>${p.verificationCode}</strong> ·

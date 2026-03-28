@@ -122,6 +122,39 @@ const Store = (() => {
     return getAllPresentations().find(p => p.verificationCode === code);
   }
 
+  function getLatestPresentationByCredentialId(credentialId) {
+    const all = getAllPresentations();
+    for (let i = all.length - 1; i >= 0; i--) {
+      if (all[i]?.credential?.id === credentialId) return all[i];
+    }
+    return null;
+  }
+
+  function updatePresentationByCode(code, updater) {
+    const all = getAllPresentations();
+    const idx = all.findIndex(p => p.verificationCode === code);
+    if (idx === -1) return null;
+
+    const current = all[idx];
+    const updated = typeof updater === 'function'
+      ? updater(current)
+      : { ...current, ...updater };
+
+    if (!updated) return null;
+    all[idx] = updated;
+    setJSON(localStorage, KEYS.PRESENTATIONS, all);
+    StateManager.emit('presentation:updated', updated);
+    return updated;
+  }
+
+  function saveOrReplacePresentationForCredential(credentialId, presentation) {
+    const all = getAllPresentations().filter(p => p?.credential?.id !== credentialId);
+    all.push(presentation);
+    setJSON(localStorage, KEYS.PRESENTATIONS, all);
+    StateManager.emit('presentation:updated', presentation);
+    return presentation;
+  }
+
   function markPresentationUsed(code) {
     const all = getAllPresentations();
     const p = all.find(p => p.verificationCode === code);
@@ -184,7 +217,7 @@ const Store = (() => {
     saveIssuerMeta, getIssuerMeta,
     getAllCredentials, saveCredential, getCredentialsByEnrollment, getCredentialById,
     getClaimedCredentials, claimCredential, isCredentialClaimed,
-    getAllPresentations, savePresentation, getPresentationByCode, markPresentationUsed,
+    getAllPresentations, savePresentation, getPresentationByCode, getLatestPresentationByCredentialId, updatePresentationByCode, saveOrReplacePresentationForCredential, markPresentationUsed,
     getRevokedIds, revokeCredential, isRevoked,
     getAuditLog, appendAuditLog, exportAuditLog,
     clearAll,

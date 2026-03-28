@@ -179,7 +179,65 @@
         if (overallStatus === 'success') overallStatus = 'warning';
       }
 
-      // ── Check 6: REAL Groth16 ZKP Proof Verification ──────────────
+      // ── Check 6: Blockchain Anchor Verification ───────────────────
+      const storedAnchorHash = presentation.blockchain?.anchorHash;
+      if (storedAnchorHash) {
+        if (typeof BlockchainModule === 'undefined') {
+          checks.push({
+            label: 'Blockchain Anchor',
+            status: 'warning',
+            detail: '⚠️ Blockchain module not loaded; on-chain verification skipped',
+          });
+          if (overallStatus === 'success') overallStatus = 'warning';
+        } else {
+          try {
+            const recomputedHash = await BlockchainModule.computeCredentialHashFromPresentation(presentation);
+            if (recomputedHash !== storedAnchorHash) {
+              checks.push({
+                label: 'Blockchain Anchor',
+                status: 'fail',
+                detail: '⛓️ ❌ Anchor hash mismatch — presentation payload was modified after creation',
+              });
+              overallStatus = 'failure';
+            } else {
+              const chainResult = await BlockchainModule.verifyHash(storedAnchorHash);
+              if (chainResult.anchored) {
+                const anchoredAt = chainResult.anchorTime
+                  ? new Date(chainResult.anchorTime * 1000).toLocaleString()
+                  : 'timestamp unavailable';
+                checks.push({
+                  label: 'Blockchain Anchor',
+                  status: 'pass',
+                  detail: `⛓️ ✅ Hash anchored on-chain (${presentation.blockchain?.network || 'Polygon Amoy'}) at ${anchoredAt}`,
+                });
+              } else {
+                checks.push({
+                  label: 'Blockchain Anchor',
+                  status: 'warning',
+                  detail: '⛓️ ⚠️ Anchor hash not found on-chain (credential remains cryptographically verifiable off-chain)',
+                });
+                if (overallStatus === 'success') overallStatus = 'warning';
+              }
+            }
+          } catch (e) {
+            checks.push({
+              label: 'Blockchain Anchor',
+              status: 'warning',
+              detail: `⛓️ ⚠️ Could not verify on-chain anchor: ${e.message}`,
+            });
+            if (overallStatus === 'success') overallStatus = 'warning';
+          }
+        }
+      } else {
+        checks.push({
+          label: 'Blockchain Anchor',
+          status: 'warning',
+          detail: '⛓️ No blockchain anchor hash attached to this presentation',
+        });
+        if (overallStatus === 'success') overallStatus = 'warning';
+      }
+
+      // ── Check 7: REAL Groth16 ZKP Proof Verification ──────────────
       for (const [field, proofData] of Object.entries(zkpProofs)) {
         if (proofData.type === 'Groth16' && proofData.proof && proofData.publicSignals) {
           try {
