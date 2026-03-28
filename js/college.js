@@ -452,6 +452,12 @@
     if (docTypeEl) docTypeEl.selectedIndex = 0;
     const docFileEl = document.getElementById('source-doc-file');
     if (docFileEl) docFileEl.value = '';
+    const zoneEl = document.getElementById('upload-zone');
+    if (zoneEl) {
+      zoneEl.classList.remove('active');
+      document.getElementById('upload-zone-text').textContent = 'Click to share evidence';
+      document.getElementById('upload-zone-sub').textContent = 'PDF/PNG (Max 2MB)';
+    }
 
     renderIssuedList();
     renderStats();
@@ -641,13 +647,28 @@
   if (sourceDocInput) {
     sourceDocInput.addEventListener('change', () => {
       const file = sourceDocInput.files?.[0];
-      if (!file) return;
+      const zone = document.getElementById('upload-zone');
+      const text = document.getElementById('upload-zone-text');
+      const sub = document.getElementById('upload-zone-sub');
+
+      if (!file) {
+        if (zone) zone.classList.remove('active');
+        if (text) text.textContent = 'Click to share evidence';
+        return;
+      }
+
       if (file.size > MAX_SOURCE_DOC_BYTES) {
         showToast('Source document must be 2MB or smaller', 'error');
         sourceDocInput.value = '';
+        if (zone) zone.classList.remove('active');
+        if (text) text.textContent = 'Click to share evidence';
         return;
       }
-      showToast('Upload doc successful', 'success');
+
+      if (zone) zone.classList.add('active');
+      if (text) text.textContent = 'Document selected';
+      if (sub) sub.textContent = file.name;
+      showToast('Document ready for signing', 'success');
     });
   }
 
