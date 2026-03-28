@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Student Credential Wallet — Claim, hold, and selectively share your verifiable academic credentials.">
   <title>Student Wallet — CredChain Holder</title>
-  <link rel="stylesheet" href="css/style.css?v=20260328-6">
+  <link rel="stylesheet" href="css/style.css?v=20260328-7">
 </head>
 <body>
 
@@ -31,6 +31,17 @@
         👛 <span class="gradient-text">Student Wallet</span>
       </h1>
       <p class="page-subtitle">Your credentials, your control. Claim credentials issued by your college, then selectively share them with verifiers using toggle switches.</p>
+    </div>
+
+    <!-- Student Auth -->
+    <div class="card" style="margin-bottom: var(--space-lg);">
+      <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: var(--space-md);">Student Authentication</h3>
+      <div style="display:flex; gap: var(--space-sm); align-items:center; flex-wrap: wrap;">
+        <button class="btn btn-primary btn-sm" id="btn-student-login">🔐 Sign in with Google</button>
+        <button class="btn btn-ghost btn-sm" id="btn-student-logout">Logout</button>
+        <button class="btn btn-ghost btn-sm" id="btn-student-biometric">🧬 Enable Biometric</button>
+      </div>
+      <div id="student-auth-status" style="font-size:0.78rem; color:var(--text-secondary); margin-top: var(--space-sm);">Not authenticated</div>
     </div>
 
     <!-- Holder Wallet -->
@@ -125,14 +136,20 @@
   <!-- Toast Container -->
   <div class="toast-container" id="toast-container"></div>
 
-  <script src="js/qrcode.min.js?v=20260328-6"></script>
-  <script src="js/snarkjs.min.js?v=20260328-6"></script>
+  <script src="js/qrcode.min.js?v=20260328-7"></script>
+  <script src="js/snarkjs.min.js?v=20260328-7"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.1/dist/ethers.umd.min.js"></script>
-  <script src="js/state.js?v=20260328-6"></script>
-  <script src="js/crypto.js?v=20260328-6"></script>
-  <script src="js/store.js?v=20260328-6"></script>
-  <script src="js/data.js?v=20260328-6"></script>
-  <script src="js/blockchain.js?v=20260328-6"></script>
-  <script src="js/wallet.js?v=20260328-6"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="js/firebase-config.js?v=20260328-7"></script>
+  <script src="js/state.js?v=20260328-7"></script>
+  <script src="js/crypto.js?v=20260328-7"></script>
+  <script src="js/store.js?v=20260328-7"></script>
+  <script src="js/data.js?v=20260328-7"></script>
+  <script src="js/blockchain.js?v=20260328-7"></script>
+  <script src="js/cloud-auth.js?v=20260328-7"></script>
+  <script src="js/cloud-api.js?v=20260328-7"></script>
+  <script src="js/biometric-auth.js?v=20260328-7"></script>
+  <script src="js/wallet.js?v=20260328-7"></script>
 </body>
 </html>

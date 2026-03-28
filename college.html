@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="College Credential Issuer Portal — Issue verifiable academic credentials with cryptographic signatures.">
   <title>College Portal — CredChain Issuer</title>
-  <link rel="stylesheet" href="css/style.css?v=20260328-6">
+  <link rel="stylesheet" href="css/style.css?v=20260328-7">
 </head>
 <body>
 
@@ -37,6 +37,21 @@
         🏫 <span class="gradient-text">College Issuer</span> Portal
       </h1>
       <p class="page-subtitle">Issue verifiable academic credentials. Each credential is signed with the university's ECDSA private key and can be verified by anyone with the public key.</p>
+    </div>
+
+    <!-- Admin Auth -->
+    <div class="card" style="margin-bottom: var(--space-lg);">
+      <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: var(--space-md);">College Admin Authentication</h3>
+      <div style="display:flex; gap: var(--space-sm); flex-wrap: wrap; align-items:center;">
+        <input type="email" class="form-input" id="admin-email" placeholder="admin@college.edu" style="max-width:260px;">
+        <input type="password" class="form-input" id="admin-password" placeholder="Password" style="max-width:200px;">
+        <button class="btn btn-primary btn-sm" id="btn-admin-login">🔐 Admin Login</button>
+        <button class="btn btn-ghost btn-sm" id="btn-admin-logout">Logout</button>
+      </div>
+      <div id="admin-auth-status" style="font-size:0.78rem; color:var(--text-secondary); margin-top: var(--space-sm);">Not authenticated</div>
+      <div style="margin-top: var(--space-sm); display:flex; gap: var(--space-sm);">
+        <button class="btn btn-ghost btn-sm" id="btn-admin-biometric">🧬 Enable Biometric</button>
+      </div>
     </div>
 
     <!-- Key Status -->
@@ -145,11 +160,17 @@
 
   <!-- Scripts (order matters: state → crypto → store → data → college) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.1/dist/ethers.umd.min.js"></script>
-  <script src="js/state.js?v=20260328-6"></script>
-  <script src="js/crypto.js?v=20260328-6"></script>
-  <script src="js/store.js?v=20260328-6"></script>
-  <script src="js/data.js?v=20260328-6"></script>
-  <script src="js/blockchain.js?v=20260328-6"></script>
-  <script src="js/college.js?v=20260328-6"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="js/firebase-config.js?v=20260328-7"></script>
+  <script src="js/state.js?v=20260328-7"></script>
+  <script src="js/crypto.js?v=20260328-7"></script>
+  <script src="js/store.js?v=20260328-7"></script>
+  <script src="js/data.js?v=20260328-7"></script>
+  <script src="js/blockchain.js?v=20260328-7"></script>
+  <script src="js/cloud-auth.js?v=20260328-7"></script>
+  <script src="js/cloud-api.js?v=20260328-7"></script>
+  <script src="js/biometric-auth.js?v=20260328-7"></script>
+  <script src="js/college.js?v=20260328-7"></script>
 </body>
 </html>

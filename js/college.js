@@ -8,7 +8,50 @@
   let publicKeyJwk = null;
   let selectedType = null;
   let issuerWalletAddress = null;
+  let adminUser = null;
   const ISSUER_WALLET_KEY = 'cc_selected_issuer_wallet';
+  const cloudAuthEnabled = !!window.FIREBASE_CONFIG?.apiKey;
+
+  function renderAdminAuth() {
+    const el = document.getElementById('admin-auth-status');
+    if (!el) return;
+    if (adminUser) {
+      el.textContent = `Authenticated as ${adminUser.email || adminUser.uid}`;
+      el.style.color = 'var(--accent-green-light)';
+    } else {
+      el.textContent = 'Not authenticated';
+      el.style.color = 'var(--text-secondary)';
+    }
+  }
+
+  async function adminLogin() {
+    if (typeof CloudAuth === 'undefined') {
+      showToast('Cloud auth not configured', 'error');
+      return;
+    }
+    const email = document.getElementById('admin-email').value.trim();
+    const password = document.getElementById('admin-password').value;
+    if (!email || !password) {
+      showToast('Enter admin email and password', 'error');
+      return;
+    }
+    try {
+      await CloudAuth.signInAdminEmailPassword(email, password);
+      showToast('Admin login successful', 'success');
+    } catch (e) {
+      showToast(`Admin login failed: ${e.message}`, 'error');
+    }
+  }
+
+  async function adminLogout() {
+    if (typeof CloudAuth === 'undefined') return;
+    try {
+      await CloudAuth.signOut();
+      showToast('Logged out', 'info');
+    } catch (e) {
+      showToast(`Logout failed: ${e.message}`, 'error');
+    }
+  }
 
   function formatAddress(addr) {
     if (!addr || typeof addr !== 'string') return '—';
@@ -217,6 +260,10 @@
   // ── Issue credential ────────────────────────────────────────────
   async function issueCredential() {
     if (!selectedType || !privateKey) return;
+    if (cloudAuthEnabled && !adminUser) {
+      showToast('Admin login required before issuing', 'error');
+      return;
+    }
 
     const type = CredentialTypes[selectedType];
     const subjectData = {};
@@ -254,6 +301,19 @@
       return;
     }
 
+    if (typeof BiometricAuth !== 'undefined' && BiometricAuth.isEnabled()) {
+      try {
+        const ok = await BiometricAuth.verify();
+        if (!ok) {
+          showToast('Biometric authentication failed', 'error');
+          return;
+        }
+      } catch (e) {
+        showToast(`Biometric authentication failed: ${e.message}`, 'error');
+        return;
+      }
+    }
+
     const issuer = { id: issuerDid, name: issuerName, walletAddress: issuerWalletAddress };
 
     // Build credential
@@ -275,6 +335,13 @@
 
     // Save
     Store.saveCredential(credential);
+    if (cloudAuthEnabled && typeof CloudApi !== 'undefined') {
+      try {
+        await CloudApi.issueCredential(credential);
+      } catch (e) {
+        showToast(`Credential issued locally, cloud sync failed: ${e.message}`, 'error');
+      }
+    }
     Store.appendAuditLog({
       event: 'issued',
       actor: issuerName,
@@ -428,6 +495,20 @@
   document.getElementById('btn-fill-sample').addEventListener('click', fillSampleData);
   document.getElementById('btn-export-log').addEventListener('click', exportLog);
   document.getElementById('btn-connect-issuer-wallet').addEventListener('click', () => connectIssuerWallet(true));
+  document.getElementById('btn-admin-login').addEventListener('click', adminLogin);
+  document.getElementById('btn-admin-logout').addEventListener('click', adminLogout);
+  document.getElementById('btn-admin-biometric').addEventListener('click', async () => {
+    if (typeof BiometricAuth === 'undefined') {
+      showToast('Biometric module not loaded', 'error');
+      return;
+    }
+    try {
+      await BiometricAuth.enroll();
+      showToast('Biometric enabled for issuer actions', 'success');
+    } catch (e) {
+      showToast(`Biometric enrollment failed: ${e.message}`, 'error');
+    }
+  });
 
   // Re-register public key when issuer name changes
   document.getElementById('issuer-name').addEventListener('change', () => {
@@ -443,6 +524,14 @@
   StateManager.enableCrossTabSync();
 
   // ── Init ────────────────────────────────────────────────────────
+  if (typeof CloudAuth !== 'undefined') {
+    CloudAuth.onChange((user) => {
+      adminUser = user || null;
+      renderAdminAuth();
+    });
+  } else {
+    renderAdminAuth();
+  }
   loadIssuerWalletSelection();
   renderIssuerWallet();
 

@@ -17,6 +17,19 @@
   const VK_PATH = 'zkp/verification_key.json';
   let verificationKeyCache = null;
 
+  async function syncTrustedIssuersFromCloud() {
+    if (typeof CloudApi === 'undefined') return;
+    try {
+      const res = await CloudApi.fetchTrustedIssuers();
+      const issuers = res.issuers || {};
+      Object.entries(issuers).forEach(([name, data]) => {
+        if (data.publicKey) Store.savePublicKey(name, data.publicKey);
+      });
+    } catch (e) {
+      console.warn('[Cloud] trusted issuers sync failed:', e.message);
+    }
+  }
+
   // Load verification key
   async function loadVerificationKey() {
     if (verificationKeyCache) return verificationKeyCache;
@@ -45,7 +58,19 @@
     verifyBtn.textContent = '⏳ Verifying...';
 
     try {
-      const presentation = Store.getPresentationByCode(code);
+      await syncTrustedIssuersFromCloud();
+      let presentation = Store.getPresentationByCode(code);
+      if (!presentation && typeof CloudApi !== 'undefined') {
+        try {
+          const cloud = await CloudApi.fetchPresentationByCode(code);
+          if (cloud.presentation) {
+            presentation = cloud.presentation;
+            Store.savePresentation(presentation);
+          }
+        } catch (e) {
+          // proceed with local miss handling below
+        }
+      }
       if (!presentation) {
         showResult({
           status: 'failure',
@@ -610,6 +635,7 @@
   StateManager.enableCrossTabSync();
 
   // ── Init ────────────────────────────────────────────────────────
+  syncTrustedIssuersFromCloud().then(renderIssuers);
   loadVerificationKey(); // Pre-load for faster verification
   renderIssuers();
   renderHistory();

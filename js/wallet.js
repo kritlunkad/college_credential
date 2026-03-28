@@ -9,7 +9,9 @@
 (function WalletPortal() {
   let currentShareCredential = null;
   let holderWalletAddress = null;
+  let studentUser = null;
   const HOLDER_WALLET_KEY = 'cc_selected_holder_wallet';
+  const cloudAuthEnabled = !!window.FIREBASE_CONFIG?.apiKey;
 
   // ZKP artifacts paths
   const ZKP_WASM = 'zkp/gpa_range_proof.wasm';
@@ -79,14 +81,68 @@
     }
   }
 
+  function renderStudentAuth() {
+    const el = document.getElementById('student-auth-status');
+    if (!el) return;
+    if (studentUser) {
+      el.textContent = `Authenticated as ${studentUser.email || studentUser.uid}`;
+      el.style.color = 'var(--accent-green-light)';
+    } else {
+      el.textContent = 'Not authenticated';
+      el.style.color = 'var(--text-secondary)';
+    }
+  }
+
+  async function studentLogin() {
+    if (typeof CloudAuth === 'undefined') {
+      showToast('Cloud auth not configured', 'error');
+      return;
+    }
+    try {
+      await CloudAuth.signInStudentGoogle();
+      showToast('Student login successful', 'success');
+    } catch (e) {
+      showToast(`Student login failed: ${e.message}`, 'error');
+    }
+  }
+
+  async function studentLogout() {
+    if (typeof CloudAuth === 'undefined') return;
+    try {
+      await CloudAuth.signOut();
+      showToast('Logged out', 'info');
+    } catch (e) {
+      showToast(`Logout failed: ${e.message}`, 'error');
+    }
+  }
+
   // ── Claim Credentials ───────────────────────────────────────────
-  function claimCredentials() {
+  async function claimCredentials() {
     const enrollmentId = document.getElementById('claim-enrollment-id').value.trim();
     const resultEl = document.getElementById('claim-result');
 
     if (!enrollmentId) {
       showToast('Enter an enrollment ID', 'error');
       return;
+    }
+
+    if (cloudAuthEnabled && !studentUser) {
+      showToast('Student login required before claiming', 'error');
+      return;
+    }
+
+    if (cloudAuthEnabled && typeof CloudApi !== 'undefined') {
+      try {
+        await CloudApi.bindEnrollment(enrollmentId);
+        const remote = await CloudApi.fetchCredentials(enrollmentId);
+        (remote.credentials || []).forEach((cred) => {
+          if (!Store.getCredentialById(cred.id)) {
+            Store.saveCredential(cred);
+          }
+        });
+      } catch (e) {
+        showToast(`Cloud fetch failed, using local data: ${e.message}`, 'error');
+      }
     }
 
     const matching = Store.getCredentialsByEnrollment(enrollmentId);
@@ -407,6 +463,10 @@
   // ── Generate Presentation with REAL Groth16 ZKP ─────────────────
   async function generatePresentation() {
     if (!currentShareCredential) return;
+    if (cloudAuthEnabled && !studentUser) {
+      showToast('Student login required before sharing', 'error');
+      return;
+    }
 
     const cred = currentShareCredential;
     const confirmBtn = document.getElementById('share-modal-confirm');
@@ -414,6 +474,13 @@
     confirmBtn.textContent = '⏳ Generating proof...';
 
     try {
+      if (typeof BiometricAuth !== 'undefined' && BiometricAuth.isEnabled()) {
+        const bioOk = await BiometricAuth.verify();
+        if (!bioOk) {
+          throw new Error('Biometric authentication failed');
+        }
+      }
+
       // Collect selected fields
       const selectedFields = {};
       const zkpProofs = {};
@@ -557,6 +624,13 @@
       }
 
       Store.saveOrReplacePresentationForCredential(cred.id, presentation);
+      if (cloudAuthEnabled && typeof CloudApi !== 'undefined') {
+        try {
+          await CloudApi.savePresentation(presentation);
+        } catch (e) {
+          showToast(`Presentation saved locally; cloud sync failed: ${e.message}`, 'error');
+        }
+      }
       Store.appendAuditLog({
         event: 'shared',
         actor: 'Student Wallet',
@@ -843,6 +917,20 @@
   // ── Event Listeners ─────────────────────────────────────────────
   document.getElementById('btn-claim').addEventListener('click', claimCredentials);
   document.getElementById('btn-connect-holder-wallet').addEventListener('click', () => connectHolderWallet(true));
+  document.getElementById('btn-student-login').addEventListener('click', studentLogin);
+  document.getElementById('btn-student-logout').addEventListener('click', studentLogout);
+  document.getElementById('btn-student-biometric').addEventListener('click', async () => {
+    if (typeof BiometricAuth === 'undefined') {
+      showToast('Biometric module not loaded', 'error');
+      return;
+    }
+    try {
+      await BiometricAuth.enroll();
+      showToast('Biometric enabled for student actions', 'success');
+    } catch (e) {
+      showToast(`Biometric enrollment failed: ${e.message}`, 'error');
+    }
+  });
   document.getElementById('claim-enrollment-id').addEventListener('keydown', e => {
     if (e.key === 'Enter') claimCredentials();
   });
@@ -888,6 +976,14 @@
   }
 
   // ── Init ────────────────────────────────────────────────────────
+  if (typeof CloudAuth !== 'undefined') {
+    CloudAuth.onChange((user) => {
+      studentUser = user || null;
+      renderStudentAuth();
+    });
+  } else {
+    renderStudentAuth();
+  }
   loadHolderWalletSelection();
   renderHolderWallet();
   renderWalletCards();
