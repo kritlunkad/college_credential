@@ -23,6 +23,57 @@
       el.textContent = 'Not authenticated';
       el.style.color = 'var(--text-secondary)';
     }
+    updatePortalVisibility();
+  }
+
+  function updatePortalVisibility() {
+    const isReady = !!(adminUser && issuerWalletAddress);
+    const nav = document.getElementById('main-nav');
+    const welcome = document.getElementById('welcome-message');
+    const loginCard = document.getElementById('login-card-section');
+    const walletCard = document.getElementById('wallet-card-section');
+    const issueSection = document.getElementById('issue-section');
+    const dashboardSection = document.getElementById('dashboard-section');
+    const auditSection = document.getElementById('audit-section');
+    const headerLogout = document.getElementById('btn-header-logout');
+    const cardLogout = document.getElementById('btn-admin-logout');
+
+    if (headerLogout) {
+      headerLogout.style.display = adminUser ? 'inline-block' : 'none';
+    }
+    if (cardLogout) {
+      cardLogout.style.display = adminUser ? 'none' : 'inline-block';
+    }
+
+    if (isReady) {
+      if (nav) nav.style.display = 'flex';
+      if (welcome) {
+        welcome.style.display = 'block';
+        welcome.textContent = `Welcome back, ${adminUser.email || 'Administrator'}`;
+      }
+      if (loginCard) loginCard.style.display = 'none';
+      if (walletCard) walletCard.style.display = 'none';
+      
+      // Default to issue section if everything was hidden
+      if (issueSection && dashboardSection && auditSection) {
+        const isAnySectionVisible = [issueSection, dashboardSection, auditSection].some(s => s.style.display === 'block');
+        if (!isAnySectionVisible) {
+          issueSection.style.display = 'block';
+          // Sync tab active state
+          document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+          const firstTab = document.querySelector('.tab-item');
+          if (firstTab) firstTab.classList.add('active');
+        }
+      }
+    } else {
+      if (nav) nav.style.display = 'none';
+      if (welcome) welcome.style.display = 'none';
+      if (loginCard) loginCard.style.display = 'block';
+      if (walletCard) walletCard.style.display = 'block';
+      if (issueSection) issueSection.style.display = 'none';
+      if (dashboardSection) dashboardSection.style.display = 'none';
+      if (auditSection) auditSection.style.display = 'none';
+    }
   }
 
   async function adminLogin() {
@@ -120,6 +171,7 @@
       addressEl.textContent = 'Not connected to engine';
       addressEl.style.color = 'var(--silver)';
     }
+    updatePortalVisibility();
   }
 
   function loadIssuerWalletSelection() {
@@ -155,6 +207,7 @@
       issuerWalletAddress = addr || null;
       saveIssuerWalletSelection(issuerWalletAddress);
       renderIssuerWallet();
+      updatePortalVisibility();
       if (addr && requestAccess) {
         showToast(`Issuer wallet connected: ${formatAddress(addr)}`, 'success');
       }
@@ -164,6 +217,7 @@
       issuerWalletAddress = null;
       saveIssuerWalletSelection(null);
       renderIssuerWallet();
+      updatePortalVisibility();
       return null;
     }
   }
@@ -597,7 +651,11 @@
   // ── Toast notifications ─────────────────────────────────────────
   function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
-    const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+    const icons = { 
+      success: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: #4ade80;"><path d="M20 6L9 17L4 12"></path></svg>', 
+      error: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: #f87171;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>', 
+      info: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: #c084fc;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>' 
+    };
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.innerHTML = `
@@ -631,6 +689,7 @@
   document.getElementById('btn-connect-issuer-wallet').addEventListener('click', () => connectIssuerWallet(true));
   document.getElementById('btn-admin-login').addEventListener('click', adminLogin);
   document.getElementById('btn-admin-logout').addEventListener('click', adminLogout);
+  document.getElementById('btn-header-logout').addEventListener('click', adminLogout);
   document.getElementById('btn-admin-biometric').addEventListener('click', async () => {
     if (typeof BiometricAuth === 'undefined') {
       showToast('Biometric module not loaded', 'error');
@@ -698,6 +757,7 @@
     CloudAuth.onChange((user) => {
       adminUser = user || null;
       renderAdminAuth();
+      updatePortalVisibility();
     });
   } else {
     renderAdminAuth();
@@ -710,4 +770,5 @@
   renderIssuedList();
   renderStats();
   renderAuditLog();
+  updatePortalVisibility();
 })();
