@@ -227,7 +227,25 @@
         if (overallStatus === 'success') overallStatus = 'warning';
       }
 
-      // ── Check 6: Blockchain Anchor Verification ───────────────────
+      // ── Check 6: Source Document Evidence ─────────────────────────
+      const docEvidence = cred.documentEvidence || null;
+      if (docEvidence?.sha256) {
+        const sizePart = docEvidence.sizeBytes ? `, ${docEvidence.sizeBytes} bytes` : '';
+        checks.push({
+          label: 'Source Document',
+          status: 'pass',
+          detail: `📎 Source document hash recorded (${docEvidence.sha256.slice(0, 12)}...${sizePart})`,
+        });
+      } else {
+        checks.push({
+          label: 'Source Document',
+          status: 'warning',
+          detail: '⚠️ No source document hash linked to this credential (issuance evidence unavailable)',
+        });
+        if (overallStatus === 'success') overallStatus = 'warning';
+      }
+
+      // ── Check 7: Blockchain Anchor Verification ───────────────────
       const storedAnchorHash = presentation.blockchain?.anchorHash;
       if (storedAnchorHash) {
         if (typeof BlockchainModule === 'undefined') {
@@ -285,7 +303,7 @@
         if (overallStatus === 'success') overallStatus = 'warning';
       }
 
-      // ── Check 7: Issuer vs Holder Wallet Separation ──────────────
+      // ── Check 8: Issuer vs Holder Wallet Separation ──────────────
       const issuerWallet = cred.issuer?.walletAddress || null;
       const holderWallet = presentation.blockchain?.holderWalletAddress || null;
       if (issuerWallet && holderWallet) {

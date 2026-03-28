@@ -17,6 +17,7 @@ Set these in Vercel Project Settings -> Environment Variables:
 - `FIREBASE_PROJECT_ID`
 - `FIREBASE_CLIENT_EMAIL`
 - `FIREBASE_PRIVATE_KEY` (paste with `\n` escaped newlines)
+- `FIREBASE_STORAGE_BUCKET` (optional; only needed if you later enable full file storage instead of hash-only mode)
 - `COLLEGE_ADMIN_EMAILS` (comma-separated emails allowed to issue credentials)
 - `APP_BASE_URL` (your public app URL, e.g. `https://your-app.vercel.app`)
 - `SMTP_HOST` (e.g. `smtp.gmail.com`)
@@ -45,6 +46,7 @@ npx vercel dev
    - Connect issuer wallet
    - (Optional) enable biometric
    - Issue credential (saved to cloud via `/api/issue`)
+   - Optional source document upload (hash-only mode, max 2MB; raw file is not stored in Firebase Storage)
    - Claim code + claim link emailed automatically if student email + SMTP env vars are configured
 2. Student page:
    - Sign in with Google

@@ -627,6 +627,7 @@
           issuerPublicKey: cred.issuerPublicKey,
           issuanceDate: cred.issuanceDate,
           expirationDate: cred.expirationDate,
+          documentEvidence: cred.documentEvidence || null,
           originalSubject: cred.credentialSubject,
           disclosedFields: selectedFields,
           zkpProofs: zkpProofs,

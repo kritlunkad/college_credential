@@ -27,10 +27,10 @@ const CloudApi = (() => {
     return data;
   }
 
-  async function issueCredential(credential, studentEmail = null) {
+  async function issueCredential(credential, studentEmail = null, sourceDocument = null) {
     return await request('/api/issue', {
       method: 'POST',
-      body: JSON.stringify({ credential, studentEmail }),
+      body: JSON.stringify({ credential, studentEmail, sourceDocument }),
     });
   }
 
