@@ -32,6 +32,26 @@ const Store = (() => {
     storage.setItem(key, JSON.stringify(value));
   }
 
+  function canonicalize(value) {
+    if (Array.isArray(value)) return value.map(canonicalize);
+    if (value && typeof value === 'object') {
+      const out = {};
+      Object.keys(value).sort().forEach((k) => {
+        if (typeof value[k] !== 'undefined') out[k] = canonicalize(value[k]);
+      });
+      return out;
+    }
+    return value;
+  }
+
+  function fingerprintJwk(jwk) {
+    try {
+      return JSON.stringify(canonicalize(jwk || {}));
+    } catch {
+      return '';
+    }
+  }
+
   // ── Issuer Keys ──────────────────────────────────────────────────
   function savePrivateKey(jwk) {
     setJSON(localStorage, KEYS.ISSUER_PRIVATE_KEY, jwk);
@@ -42,15 +62,66 @@ const Store = (() => {
   }
 
   function savePublicKey(issuerName, jwk) {
+    if (!issuerName || !jwk) return;
     // Save to issuers registry (multi-issuer support)
     const issuers = getIssuers();
-    issuers[issuerName] = { publicKey: jwk, registeredAt: new Date().toISOString() };
+    const now = new Date().toISOString();
+    const prev = issuers[issuerName] || {};
+    const nextFp = fingerprintJwk(jwk);
+    const history = Array.isArray(prev.publicKeys) ? [...prev.publicKeys] : [];
+
+    if (prev.publicKey) {
+      const prevFp = fingerprintJwk(prev.publicKey);
+      if (prevFp && !history.some((k) => k.fingerprint === prevFp)) {
+        history.push({
+          jwk: prev.publicKey,
+          fingerprint: prevFp,
+          registeredAt: prev.registeredAt || now,
+        });
+      }
+    }
+
+    if (nextFp && !history.some((k) => k.fingerprint === nextFp)) {
+      history.push({
+        jwk,
+        fingerprint: nextFp,
+        registeredAt: now,
+      });
+    }
+
+    issuers[issuerName] = {
+      ...prev,
+      publicKey: jwk,
+      publicKeys: history,
+      registeredAt: now,
+    };
     setJSON(localStorage, KEYS.ISSUERS, issuers);
   }
 
   function getPublicKey(issuerName) {
     const issuers = getIssuers();
     return issuers[issuerName]?.publicKey || null;
+  }
+
+  function getPublicKeys(issuerName) {
+    const issuers = getIssuers();
+    const issuer = issuers[issuerName];
+    if (!issuer) return [];
+    const out = [];
+    const seen = new Set();
+
+    const pushKey = (key) => {
+      const fp = fingerprintJwk(key);
+      if (!fp || seen.has(fp)) return;
+      seen.add(fp);
+      out.push(key);
+    };
+
+    if (Array.isArray(issuer.publicKeys)) {
+      issuer.publicKeys.forEach((entry) => pushKey(entry?.jwk || null));
+    }
+    pushKey(issuer.publicKey || null);
+    return out;
   }
 
   function getIssuers() {
@@ -86,6 +157,21 @@ const Store = (() => {
 
   function getCredentialById(id) {
     return getAllCredentials().find(c => c.id === id);
+  }
+
+  function updateCredentialById(id, updater) {
+    const all = getAllCredentials();
+    const idx = all.findIndex(c => c.id === id);
+    if (idx === -1) return null;
+    const current = all[idx];
+    const updated = typeof updater === 'function'
+      ? updater(current)
+      : { ...current, ...updater };
+    if (!updated) return null;
+    all[idx] = updated;
+    setJSON(localStorage, KEYS.CREDENTIALS, all);
+    StateManager.emit('credential:issued', updated);
+    return updated;
   }
 
   // ── Claimed Credentials (Student Wallet) ──────────────────────
@@ -213,9 +299,9 @@ const Store = (() => {
 
   return {
     savePrivateKey, getPrivateKey,
-    savePublicKey, getPublicKey, getIssuers,
+    savePublicKey, getPublicKey, getPublicKeys, getIssuers,
     saveIssuerMeta, getIssuerMeta,
-    getAllCredentials, saveCredential, getCredentialsByEnrollment, getCredentialById,
+    getAllCredentials, saveCredential, getCredentialsByEnrollment, getCredentialById, updateCredentialById,
     getClaimedCredentials, claimCredential, isCredentialClaimed,
     getAllPresentations, savePresentation, getPresentationByCode, getLatestPresentationByCredentialId, updatePresentationByCode, saveOrReplacePresentationForCredential, markPresentationUsed,
     getRevokedIds, revokeCredential, isRevoked,

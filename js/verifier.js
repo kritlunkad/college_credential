@@ -17,6 +17,35 @@
   const VK_PATH = 'zkp/verification_key.json';
   let verificationKeyCache = null;
 
+  async function syncTrustedIssuersFromCloud() {
+    if (typeof CloudApi === 'undefined') return;
+    try {
+      const res = await CloudApi.fetchTrustedIssuers();
+      const issuers = res.issuers || {};
+      Object.entries(issuers).forEach(([name, data]) => {
+        if (data.publicKey) Store.savePublicKey(name, data.publicKey);
+      });
+    } catch (e) {
+      console.warn('[Cloud] trusted issuers sync failed:', e.message);
+    }
+  }
+
+  function canonicalize(value) {
+    if (Array.isArray(value)) return value.map(canonicalize);
+    if (value && typeof value === 'object') {
+      const out = {};
+      Object.keys(value).sort().forEach((k) => {
+        if (typeof value[k] !== 'undefined') out[k] = canonicalize(value[k]);
+      });
+      return out;
+    }
+    return value;
+  }
+
+  function jwkEqual(a, b) {
+    return JSON.stringify(canonicalize(a || {})) === JSON.stringify(canonicalize(b || {}));
+  }
+
   // Load verification key
   async function loadVerificationKey() {
     if (verificationKeyCache) return verificationKeyCache;
@@ -45,7 +74,19 @@
     verifyBtn.textContent = '⏳ Verifying...';
 
     try {
-      const presentation = Store.getPresentationByCode(code);
+      await syncTrustedIssuersFromCloud();
+      let presentation = Store.getPresentationByCode(code);
+      if (!presentation && typeof CloudApi !== 'undefined') {
+        try {
+          const cloud = await CloudApi.fetchPresentationByCode(code);
+          if (cloud.presentation) {
+            presentation = cloud.presentation;
+            Store.savePresentation(presentation);
+          }
+        } catch (e) {
+          // proceed with local miss handling below
+        }
+      }
       if (!presentation) {
         showResult({
           status: 'failure',
@@ -160,16 +201,23 @@
       // ── Check 5: Issuer Trust ─────────────────────────────────────
       const issuerName = cred.issuer.name.trim();
       const registeredKey = Store.getPublicKey(issuerName);
-      if (registeredKey) {
-        const keysMatch = JSON.stringify(cred.issuerPublicKey) === JSON.stringify(registeredKey);
+      const allTrustedKeys = typeof Store.getPublicKeys === 'function'
+        ? Store.getPublicKeys(issuerName)
+        : (registeredKey ? [registeredKey] : []);
+
+      if (allTrustedKeys.length > 0) {
+        const matchesCurrent = registeredKey ? jwkEqual(cred.issuerPublicKey, registeredKey) : false;
+        const matchesAny = allTrustedKeys.some((k) => jwkEqual(cred.issuerPublicKey, k));
         checks.push({
           label: 'Issuer Trust',
-          status: keysMatch ? 'pass' : 'warning',
-          detail: keysMatch
-            ? `Issuer "${issuerName}" is in the trusted registry with a matching public key`
-            : `⚠️ Issuer key does not match the registered key for "${issuerName}"`,
+          status: matchesAny ? 'pass' : 'warning',
+          detail: matchesAny
+            ? (matchesCurrent
+              ? `Issuer "${issuerName}" is in the trusted registry with a matching public key`
+              : `Issuer "${issuerName}" key matches a trusted historical key (key rotation detected)`)
+            : `⚠️ Issuer key does not match any trusted key for "${issuerName}"`,
         });
-        if (!keysMatch && overallStatus === 'success') overallStatus = 'warning';
+        if (!matchesAny && overallStatus === 'success') overallStatus = 'warning';
       } else {
         checks.push({
           label: 'Issuer Trust',
@@ -179,7 +227,25 @@
         if (overallStatus === 'success') overallStatus = 'warning';
       }
 
-      // ── Check 6: Blockchain Anchor Verification ───────────────────
+      // ── Check 6: Source Document Evidence ─────────────────────────
+      const docEvidence = cred.documentEvidence || null;
+      if (docEvidence?.sha256) {
+        const sizePart = docEvidence.sizeBytes ? `, ${docEvidence.sizeBytes} bytes` : '';
+        checks.push({
+          label: 'Source Document',
+          status: 'pass',
+          detail: `📎 Source document hash recorded (${docEvidence.sha256.slice(0, 12)}...${sizePart})`,
+        });
+      } else {
+        checks.push({
+          label: 'Source Document',
+          status: 'warning',
+          detail: '⚠️ No source document hash linked to this credential (issuance evidence unavailable)',
+        });
+        if (overallStatus === 'success') overallStatus = 'warning';
+      }
+
+      // ── Check 7: Blockchain Anchor Verification ───────────────────
       const storedAnchorHash = presentation.blockchain?.anchorHash;
       if (storedAnchorHash) {
         if (typeof BlockchainModule === 'undefined') {
@@ -237,7 +303,7 @@
         if (overallStatus === 'success') overallStatus = 'warning';
       }
 
-      // ── Check 7: Issuer vs Holder Wallet Separation ──────────────
+      // ── Check 8: Issuer vs Holder Wallet Separation ──────────────
       const issuerWallet = cred.issuer?.walletAddress || null;
       const holderWallet = presentation.blockchain?.holderWalletAddress || null;
       if (issuerWallet && holderWallet) {
@@ -610,6 +676,7 @@
   StateManager.enableCrossTabSync();
 
   // ── Init ────────────────────────────────────────────────────────
+  syncTrustedIssuersFromCloud().then(renderIssuers);
   loadVerificationKey(); // Pre-load for faster verification
   renderIssuers();
   renderHistory();

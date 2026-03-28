@@ -8,11 +8,97 @@
   let publicKeyJwk = null;
   let selectedType = null;
   let issuerWalletAddress = null;
+  let adminUser = null;
   const ISSUER_WALLET_KEY = 'cc_selected_issuer_wallet';
+  const cloudAuthEnabled = !!window.FIREBASE_CONFIG?.apiKey;
+  const MAX_SOURCE_DOC_BYTES = 2 * 1024 * 1024; // 2MB
+
+  function renderAdminAuth() {
+    const el = document.getElementById('admin-auth-status');
+    if (!el) return;
+    if (adminUser) {
+      el.textContent = `Authenticated as ${adminUser.email || adminUser.uid}`;
+      el.style.color = 'var(--accent-green-light)';
+    } else {
+      el.textContent = 'Not authenticated';
+      el.style.color = 'var(--text-secondary)';
+    }
+  }
+
+  async function adminLogin() {
+    if (typeof CloudAuth === 'undefined') {
+      showToast('Cloud auth not configured', 'error');
+      return;
+    }
+    const email = document.getElementById('admin-email').value.trim();
+    const password = document.getElementById('admin-password').value;
+    if (!email || !password) {
+      showToast('Enter admin email and password', 'error');
+      return;
+    }
+    try {
+      await CloudAuth.signInAdminEmailPassword(email, password);
+      showToast('Admin login successful', 'success');
+    } catch (e) {
+      showToast(`Admin login failed: ${e.message}`, 'error');
+    }
+  }
+
+  async function adminLogout() {
+    if (typeof CloudAuth === 'undefined') return;
+    try {
+      await CloudAuth.signOut();
+      showToast('Logged out', 'info');
+    } catch (e) {
+      showToast(`Logout failed: ${e.message}`, 'error');
+    }
+  }
 
   function formatAddress(addr) {
     if (!addr || typeof addr !== 'string') return '—';
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  }
+
+  function generateClaimCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let out = '';
+    for (let i = 0; i < 8; i++) out += chars[Math.floor(Math.random() * chars.length)];
+    return out;
+  }
+
+  async function sha256OfBuffer(arrayBuffer) {
+    const digest = await crypto.subtle.digest('SHA-256', arrayBuffer);
+    return Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  async function prepareSourceDocumentUpload() {
+    const fileInput = document.getElementById('source-doc-file');
+    const typeInput = document.getElementById('source-doc-type');
+    const selectedType = typeInput?.value?.trim() || null;
+    const file = fileInput?.files?.[0];
+
+    if (!file) return { payload: null, evidence: null };
+    if (file.size > MAX_SOURCE_DOC_BYTES) {
+      throw new Error('Source document must be 2MB or smaller');
+    }
+
+    const arrayBuffer = await file.arrayBuffer();
+    const sha256 = await sha256OfBuffer(arrayBuffer);
+    const evidence = {
+      type: selectedType,
+      fileName: file.name,
+      mimeType: file.type || 'application/octet-stream',
+      sizeBytes: file.size,
+      sha256,
+      storagePath: null,
+      uploadedAt: new Date().toISOString(),
+      status: 'local_only',
+      reason: null,
+    };
+
+    return { payload: null, evidence };
   }
 
   function renderIssuerWallet() {
@@ -217,6 +303,10 @@
   // ── Issue credential ────────────────────────────────────────────
   async function issueCredential() {
     if (!selectedType || !privateKey) return;
+    if (cloudAuthEnabled && !adminUser) {
+      showToast('Admin login required before issuing', 'error');
+      return;
+    }
 
     const type = CredentialTypes[selectedType];
     const subjectData = {};
@@ -248,16 +338,51 @@
     const issuerName = document.getElementById('issuer-name').value.trim();
     const issuerDid = document.getElementById('issuer-did').value.trim();
     const expiryDays = parseInt(document.getElementById('expiry-days').value) || 365;
+    const assignedStudentEmail = document.getElementById('assigned-student-email').value.trim().toLowerCase();
+    let sourceDoc = { evidence: null };
 
     if (!issuerWalletAddress) {
       showToast('Connect the issuer MetaMask wallet before issuing', 'error');
       return;
+    }
+    if (cloudAuthEnabled && !assignedStudentEmail) {
+      showToast('Assigned Student Email is required in cloud mode', 'error');
+      return;
+    }
+    if (assignedStudentEmail) {
+      subjectData.studentEmail = assignedStudentEmail;
+    }
+    try {
+      sourceDoc = await prepareSourceDocumentUpload();
+    } catch (e) {
+      showToast(`Document upload preparation failed: ${e.message}`, 'error');
+      return;
+    }
+
+    if (typeof BiometricAuth !== 'undefined' && BiometricAuth.isEnabled()) {
+      try {
+        const ok = await BiometricAuth.verify();
+        if (!ok) {
+          showToast('Biometric authentication failed', 'error');
+          return;
+        }
+      } catch (e) {
+        showToast(`Biometric authentication failed: ${e.message}`, 'error');
+        return;
+      }
     }
 
     const issuer = { id: issuerDid, name: issuerName, walletAddress: issuerWalletAddress };
 
     // Build credential
     const credential = buildCredential(type, subjectData, issuer, expiryDays);
+    credential.claimCode = generateClaimCode();
+    credential.emailDelivery = assignedStudentEmail
+      ? { status: 'pending', reason: null, sentAt: null, email: assignedStudentEmail }
+      : { status: 'not_configured', reason: 'student email missing', sentAt: null, email: null };
+    if (sourceDoc.evidence) {
+      credential.documentEvidence = sourceDoc.evidence;
+    }
 
     // Embed issuer's public key for self-contained verification
     credential.issuerPublicKey = publicKeyJwk;
@@ -275,10 +400,37 @@
 
     // Save
     Store.saveCredential(credential);
+    if (cloudAuthEnabled && typeof CloudApi !== 'undefined') {
+      try {
+        const cloudRes = await CloudApi.issueCredential(credential, assignedStudentEmail, null);
+        if (cloudRes.claimCode) {
+          credential.claimCode = cloudRes.claimCode;
+          Store.updateCredentialById(credential.id, { claimCode: cloudRes.claimCode });
+        }
+        if (cloudRes.email?.sent) {
+          const sentAt = cloudRes.email?.sentAt || new Date().toISOString();
+          credential.emailDelivery = { status: 'sent', reason: null, sentAt, email: assignedStudentEmail || null };
+          Store.updateCredentialById(credential.id, { emailDelivery: credential.emailDelivery });
+          showToast(`Claim code emailed to ${assignedStudentEmail}`, 'success');
+        } else if (assignedStudentEmail) {
+          const reason = cloudRes.email?.reason || 'email not configured';
+          credential.emailDelivery = { status: 'failed', reason, sentAt: null, email: assignedStudentEmail };
+          Store.updateCredentialById(credential.id, { emailDelivery: credential.emailDelivery });
+          showToast(`Issued, but email not sent: ${reason}`, 'error');
+        }
+      } catch (e) {
+        credential.emailDelivery = { status: 'failed', reason: e.message || 'cloud sync failed', sentAt: null, email: assignedStudentEmail || null };
+        Store.updateCredentialById(credential.id, { emailDelivery: credential.emailDelivery });
+        showToast(`Credential issued locally, cloud sync failed: ${e.message}`, 'error');
+      }
+    }
+    if (sourceDoc.evidence) {
+      showToast('Upload doc successful', 'success');
+    }
     Store.appendAuditLog({
       event: 'issued',
       actor: issuerName,
-      details: `${type.label} issued to ${subjectData.name} (${subjectData.enrollmentId})`,
+      details: `${type.label} issued to ${subjectData.name} (${subjectData.enrollmentId}) · ClaimCode: ${credential.claimCode}`,
       credentialId: credential.id,
     });
 
@@ -289,6 +441,10 @@
       if (el.type === 'select-one') el.selectedIndex = 0;
       else el.value = '';
     });
+    const docTypeEl = document.getElementById('source-doc-type');
+    if (docTypeEl) docTypeEl.selectedIndex = 0;
+    const docFileEl = document.getElementById('source-doc-file');
+    if (docFileEl) docFileEl.value = '';
 
     renderIssuedList();
     renderStats();
@@ -317,6 +473,19 @@
       const isRevoked = Store.isRevoked(cred.id);
       const isClaimed = Store.isCredentialClaimed(cred.id);
       const expiry = getExpiryStatus(cred.expirationDate);
+      const emailStatus = cred.emailDelivery?.status;
+      const docStatus = cred.documentEvidence?.status;
+      let emailBadge = '';
+      if (emailStatus === 'sent') emailBadge = '<span class="badge badge-valid">Email Sent</span>';
+      else if (emailStatus === 'failed') emailBadge = '<span class="badge badge-failed">Email Failed</span>';
+      else if (emailStatus === 'pending') emailBadge = '<span class="badge badge-expiring">Email Pending</span>';
+      else if (emailStatus === 'not_configured') emailBadge = '<span class="badge badge-expiring">Email Not Set</span>';
+      const emailReason = cred.emailDelivery?.reason ? ` · Email: ${cred.emailDelivery.reason}` : '';
+      let docBadge = '';
+      if (docStatus === 'linked' || docStatus === 'local_only' || docStatus === 'hash_only') docBadge = '<span class="badge badge-valid">Doc Uploaded</span>';
+      else if (docStatus === 'failed') docBadge = '<span class="badge badge-failed">Doc Upload Failed</span>';
+      else if (docStatus === 'pending') docBadge = '<span class="badge badge-expiring">Doc Pending</span>';
+      const docReason = cred.documentEvidence?.reason ? ` · Doc: ${cred.documentEvidence.reason}` : '';
 
       const card = document.createElement('div');
       card.className = 'credential-mini fade-in';
@@ -329,10 +498,12 @@
             ${typeInfo.label} — ${cred.credentialSubject.name}
             ${isRevoked ? '<span class="badge badge-revoked">Revoked</span>' : ''}
             ${isClaimed ? '<span class="badge badge-valid">Claimed</span>' : ''}
+            ${emailBadge}
+            ${docBadge}
             <span class="badge ${expiry.class}">${expiry.label}</span>
           </div>
           <div class="credential-mini-sub">
-            ${cred.credentialSubject.enrollmentId} · ID: ${cred.id} · Issued: ${new Date(cred.issuanceDate).toLocaleDateString()}
+            ${cred.credentialSubject.enrollmentId} · Claim Code: <strong>${cred.claimCode || '—'}</strong> · Issued: ${new Date(cred.issuanceDate).toLocaleDateString()}${emailReason}${docReason}
           </div>
         </div>
         ${!isRevoked ? `<button class="btn btn-danger btn-sm" data-revoke="${cred.id}">Revoke</button>` : ''}
@@ -428,6 +599,33 @@
   document.getElementById('btn-fill-sample').addEventListener('click', fillSampleData);
   document.getElementById('btn-export-log').addEventListener('click', exportLog);
   document.getElementById('btn-connect-issuer-wallet').addEventListener('click', () => connectIssuerWallet(true));
+  document.getElementById('btn-admin-login').addEventListener('click', adminLogin);
+  document.getElementById('btn-admin-logout').addEventListener('click', adminLogout);
+  document.getElementById('btn-admin-biometric').addEventListener('click', async () => {
+    if (typeof BiometricAuth === 'undefined') {
+      showToast('Biometric module not loaded', 'error');
+      return;
+    }
+    try {
+      await BiometricAuth.enroll();
+      showToast('Biometric enabled for issuer actions', 'success');
+    } catch (e) {
+      showToast(`Biometric enrollment failed: ${e.message}`, 'error');
+    }
+  });
+  const sourceDocInput = document.getElementById('source-doc-file');
+  if (sourceDocInput) {
+    sourceDocInput.addEventListener('change', () => {
+      const file = sourceDocInput.files?.[0];
+      if (!file) return;
+      if (file.size > MAX_SOURCE_DOC_BYTES) {
+        showToast('Source document must be 2MB or smaller', 'error');
+        sourceDocInput.value = '';
+        return;
+      }
+      showToast('Upload doc successful', 'success');
+    });
+  }
 
   // Re-register public key when issuer name changes
   document.getElementById('issuer-name').addEventListener('change', () => {
@@ -443,6 +641,14 @@
   StateManager.enableCrossTabSync();
 
   // ── Init ────────────────────────────────────────────────────────
+  if (typeof CloudAuth !== 'undefined') {
+    CloudAuth.onChange((user) => {
+      adminUser = user || null;
+      renderAdminAuth();
+    });
+  } else {
+    renderAdminAuth();
+  }
   loadIssuerWalletSelection();
   renderIssuerWallet();
 
