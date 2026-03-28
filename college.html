@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="College Credential Issuer Portal — Issue verifiable academic credentials with cryptographic ECDSA signatures and optional blockchain anchoring.">
+  <meta name="description"
+    content="College Credential Issuer Portal — Issue verifiable academic credentials with cryptographic ECDSA signatures and optional blockchain anchoring.">
   <title>College Portal — CredChain Issuer</title>
   <style>
     :root {
@@ -91,6 +93,8 @@
       padding: 24px 40px 0;
       max-width: 1200px;
       margin: 0 auto;
+      display: flex;
+      justify-content: center;
     }
 
     .tab-bar {
@@ -191,8 +195,17 @@
       letter-spacing: 0.5px;
     }
 
-    .card-tag.green { background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
-    .card-tag.purple { background: rgba(168, 85, 247, 0.1); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.2); }
+    .card-tag.green {
+      background: rgba(34, 197, 94, 0.1);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .card-tag.purple {
+      background: rgba(168, 85, 247, 0.1);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.2);
+    }
 
     /* ── Forms ─────────────────────────────────────────────── */
     .form-grid {
@@ -214,7 +227,8 @@
       margin-left: 4px;
     }
 
-    .form-input, .form-select {
+    .form-input,
+    .form-select {
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--ghost-border);
       color: var(--bone);
@@ -224,7 +238,9 @@
       transition: all 0.3s var(--ease);
     }
 
-    .form-input:focus, .form-select:focus, .form-textarea:focus {
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
       outline: none;
       border-color: rgba(255, 255, 255, 0.3);
       background: rgba(255, 255, 255, 0.06);
@@ -242,8 +258,14 @@
       resize: vertical;
     }
 
-    .form-group.full-width { grid-column: 1 / -1; }
-    .required { color: #f87171; margin-left: 2px; }
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .required {
+      color: #f87171;
+      margin-left: 2px;
+    }
 
     /* ── Buttons ───────────────────────────────────────────── */
     .btn {
@@ -260,13 +282,36 @@
       border: none;
     }
 
-    .btn-primary { background: var(--accent); color: var(--obsidian); }
-    .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
-    .btn-secondary { background: var(--ghost); color: var(--bone); border: 1px solid var(--ghost-border); }
-    .btn-ghost { background: transparent; color: var(--silver); }
-    .btn-ghost:hover { color: var(--bone); background: var(--ghost); }
+    .btn-primary {
+      background: var(--accent);
+      color: var(--obsidian);
+    }
 
-    .btn-sm { padding: 8px 16px; font-size: 0.8rem; }
+    .btn-primary:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: var(--ghost);
+      color: var(--bone);
+      border: 1px solid var(--ghost-border);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--silver);
+    }
+
+    .btn-ghost:hover {
+      color: var(--bone);
+      background: var(--ghost);
+    }
+
+    .btn-sm {
+      padding: 8px 16px;
+      font-size: 0.8rem;
+    }
 
     /* ── Specific Elements ─────────────────────────────────── */
     .demo-banner {
@@ -298,7 +343,10 @@
       box-shadow: 0 0 10px #4ade80;
     }
 
-    .dot.inactive { background: #94a3b8; box-shadow: none; }
+    .dot.inactive {
+      background: #94a3b8;
+      box-shadow: none;
+    }
 
     .stats-row {
       display: grid;
@@ -315,15 +363,37 @@
       text-align: center;
     }
 
-    .stat-value { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; color: var(--accent); }
-    .stat-label { font-size: 0.75rem; color: var(--silver); text-transform: uppercase; letter-spacing: 1px; opacity: 0.6; }
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--accent);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--silver);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.6;
+    }
 
     /* ── Type Options ──────────────────────────────────────── */
-    #type-selector { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; }
-    
+    #type-selector {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+
     /* ── Type Options ──────────────────────────────────────── */
-    #type-selector { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; }
-    
+    #type-selector {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+
     .type-option {
       background: var(--ghost);
       border: 1px solid var(--ghost-border);
@@ -369,11 +439,22 @@
       color: var(--obsidian);
     }
 
-    .section-title { font-size: 1.3rem; margin-bottom: 24px; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
+    .section-title {
+      font-size: 1.3rem;
+      margin-bottom: 24px;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
     /* ── Generated Dashboard Items ────────────────────────── */
-    #issued-list { display: flex; flex-direction: column; gap: 12px; }
-    
+    #issued-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
     .credential-mini {
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--ghost-border);
@@ -384,7 +465,7 @@
       gap: 16px;
       transition: all 0.3s var(--ease);
     }
-    
+
     .credential-mini:hover {
       background: rgba(255, 255, 255, 0.05);
       border-color: rgba(255, 255, 255, 0.15);
@@ -401,9 +482,26 @@
       font-size: 1.1rem;
     }
 
-    .credential-mini-info { flex: 1; min-width: 0; }
-    .credential-mini-title { font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .credential-mini-sub { font-size: 0.75rem; color: var(--silver); opacity: 0.6; margin-top: 2px; }
+    .credential-mini-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .credential-mini-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .credential-mini-sub {
+      font-size: 0.75rem;
+      color: var(--silver);
+      opacity: 0.6;
+      margin-top: 2px;
+    }
 
     .badge {
       padding: 2px 8px;
@@ -413,15 +511,47 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-    .badge-valid { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
-    .badge-revoked, .badge-failed { background: rgba(239, 68, 68, 0.15); color: #f87171; }
-    .badge-expiring { background: rgba(234, 179, 8, 0.15); color: #fbbf24; }
+
+    .badge-valid {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+    }
+
+    .badge-revoked,
+    .badge-failed {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+    }
+
+    .badge-expiring {
+      background: rgba(234, 179, 8, 0.15);
+      color: #fbbf24;
+    }
 
     /* ── Audit Log ────────────────────────────────────────── */
-    .audit-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-    .audit-table th { text-align: left; padding: 12px 16px; color: var(--silver); font-weight: 600; border-bottom: 1px solid var(--ghost-border); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
-    .audit-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.03); color: var(--silver); }
-    
+    .audit-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .audit-table th {
+      text-align: left;
+      padding: 12px 16px;
+      color: var(--silver);
+      font-weight: 600;
+      border-bottom: 1px solid var(--ghost-border);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .audit-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      color: var(--silver);
+    }
+
     .audit-event {
       padding: 2px 8px;
       border-radius: 4px;
@@ -429,38 +559,161 @@
       font-weight: 700;
       text-transform: uppercase;
     }
-    .audit-event.issued { background: rgba(34, 197, 94, 0.1); color: #4ade80; }
-    .audit-event.revoked { background: rgba(239, 68, 68, 0.1); color: #f87171; }
-    .audit-event.key_generated { background: rgba(168, 85, 247, 0.1); color: #c084fc; }
 
-    .btn-danger { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
-    .btn-danger:hover { background: #ef4444; color: white; }
+    .audit-event.issued {
+      background: rgba(34, 197, 94, 0.1);
+      color: #4ade80;
+    }
 
-    .toast-container { position: fixed; bottom: 32px; right: 32px; z-index: 2000; display: flex; flex-direction: column; gap: 12px; }
+    .audit-event.revoked {
+      background: rgba(239, 68, 68, 0.1);
+      color: #f87171;
+    }
+
+    .audit-event.key_generated {
+      background: rgba(168, 85, 247, 0.1);
+      color: #c084fc;
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.1);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-danger:hover {
+      background: #ef4444;
+      color: white;
+    }
+
+    .toast-container {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
     .toast {
-      background: #0A0A0A; border: 1px solid var(--ghost-border); color: var(--bone);
-      padding: 12px 20px; border-radius: 12px; font-size: 0.85rem; min-width: 240px;
-      display: flex; align-items: center; gap: 12px; backdrop-filter: blur(10px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      background: #0A0A0A;
+      border: 1px solid var(--ghost-border);
+      color: var(--bone);
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      min-width: 240px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       animation: slideIn 0.3s var(--ease);
     }
-    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    @keyframes slideOut { to { transform: translateX(100%); opacity: 0; } }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* ── File Upload Zone ──────────────────────────────────── */
+    .upload-zone {
+      border: 1px dashed var(--ghost-border);
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.3s var(--ease);
+      min-height: 120px;
+      text-align: center;
+    }
+
+    .upload-zone:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .upload-zone-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--ghost);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--silver);
+      margin-bottom: 4px;
+    }
+
+    .upload-zone-text {
+      font-size: 0.75rem;
+      color: var(--silver);
+      opacity: 1;
+      font-weight: 500;
+    }
+
+    .upload-zone-sub {
+      font-size: 0.65rem;
+      color: var(--silver);
+      opacity: 0.4;
+    }
+
+    .upload-zone.active {
+      border-color: #4ade80;
+      background: rgba(34, 197, 94, 0.05);
+    }
+
+    .upload-zone.active .upload-zone-icon {
+      background: #4ade80;
+      color: var(--obsidian);
+    }
+
+    .upload-zone.active .upload-zone-sub {
+      color: #4ade80;
+      opacity: 1;
+    }
 
     /* ── Responsive ────────────────────────────────────────── */
     @media (max-width: 768px) {
-      .app-header { padding: 16px 20px; }
-      .app-container { padding: 32px 20px; }
-      .stats-row { grid-template-columns: 1fr; }
-      .page-title { font-size: 1.8rem; }
+      .app-header {
+        padding: 16px 20px;
+      }
+
+      .app-container {
+        padding: 32px 20px;
+      }
+
+      .stats-row {
+        grid-template-columns: 1fr;
+      }
+
+      .page-title {
+        font-size: 1.8rem;
+      }
     }
   </style>
 </head>
+
 <body>
 
   <header class="app-header">
     <div class="app-brand">
-      <img src="assets/trustlessid logo.png" alt="TrustlessID Logo" style="height: 26px; width: auto; object-fit: contain; margin-right: 4px;">
+      <img src="assets/trustlessid logo.png" alt="TrustlessID Logo"
+        style="height: 26px; width: auto; object-fit: contain; margin-right: 4px;">
       <div>
         <div class="app-brand-name">CredChain</div>
         <div class="app-brand-sub">Issuer Portal</div>
@@ -468,14 +721,12 @@
     </div>
     <div class="app-header-right" style="display: flex; align-items: center; gap: 24px;">
       <a href="index.html" class="back-link">Home</a>
-      <div class="status-indicator">
-        <span class="dot"></span>
-        <span>Issuer Active</span>
-      </div>
+      <button class="btn btn-ghost btn-sm" id="btn-header-logout"
+        style="display: none; border: 1px solid rgba(255, 75, 75, 0.2); color: #ff4b4b; font-weight: 700; font-size: 0.7rem; padding: 4px 12px; background: rgba(255, 75, 75, 0.05);">Logout</button>
     </div>
   </header>
 
-  <nav class="tab-nav">
+  <nav class="tab-nav" id="main-nav" style="display: none;">
     <div class="tab-bar">
       <button class="tab-item active" onclick="showTab('issue')">Issue Credential</button>
       <button class="tab-item" onclick="showTab('dashboard')">Dashboard</button>
@@ -484,60 +735,87 @@
   </nav>
 
   <main class="app-container">
-    <div class="demo-banner">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-      Demo mode: Private keys are ephemeral and scoped to this session.
-    </div>
 
     <div style="margin-bottom: 48px;">
       <h1 class="page-title">
         <span class="gradient-text">Institution</span> Portal
       </h1>
-      <p class="page-subtitle">Securely sign academic records. Every credential is mathematically bound to your identity via ECDSA signatures.</p>
+      <p class="page-subtitle">Securely sign academic records. Every credential is mathematically bound to your identity
+        via ECDSA signatures.</p>
+      <div id="welcome-message"
+        style="display: none; margin-top: -20px; margin-bottom: 20px; font-size: 1.1rem; font-weight: 500; color: var(--accent);">
+      </div>
     </div>
 
     <!-- Admin Auth -->
-    <div class="card">
+    <div class="card" id="login-card-section">
       <div class="card-header">
         <div>
           <div class="card-title">Authentication</div>
           <div class="card-subtitle">Secure administrative access</div>
         </div>
-        <div class="card-tag" style="background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2);">Security</div>
+        <div class="card-tag"
+          style="background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2);">Security
+        </div>
       </div>
       <div style="display:flex; gap: 12px; flex-wrap: wrap; align-items:center;">
-        <input type="email" class="form-input" id="admin-email" placeholder="admin@college.edu" style="max-width:240px;">
+        <input type="email" class="form-input" id="admin-email" placeholder="admin@college.edu"
+          style="max-width:240px;">
         <input type="password" class="form-input" id="admin-password" placeholder="Password" style="max-width:180px;">
         <button class="btn btn-primary btn-sm" id="btn-admin-login">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
           Login
         </button>
-        <button class="btn btn-ghost btn-sm" id="btn-admin-logout">Logout</button>
       </div>
-      <div id="admin-auth-status" style="font-size:0.75rem; color:var(--silver); margin-top: 16px; opacity: 0.6;">Not authenticated</div>
+      <div id="admin-auth-status" style="font-size:0.75rem; color:var(--silver); margin-top: 16px; opacity: 0.6;">Not
+        authenticated</div>
       <div style="margin-top: 16px; display:flex; gap: 8px;">
-        <button class="btn btn-secondary btn-sm" id="btn-admin-biometric">🧬 Enable Biometric</button>
+        <button class="btn btn-secondary btn-sm" id="btn-admin-biometric">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            style="margin-right: 4px;">
+            <path
+              d="M2 12c0-4.418 3.582-8 8-8s8 3.582 8 8M6 12c0-2.209 1.791-4 4-4s4 1.791 4 4M10 12c0-1.105.895-2 2-2s2 .895 2 2M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12">
+            </path>
+            <path d="M7 12c0 2.761 2.239 5 5 5s5-2.239 5-5"></path>
+            <path d="M11 12c0 .552.448 1 1 1s1-.448 1-1"></path>
+          </svg>
+          Enable Biometric
+        </button>
       </div>
     </div>
 
     <!-- MetaMask Connection Card -->
-    <div class="card" style="margin-bottom: 32px; padding: 32px 40px; border-color: rgba(255, 255, 255, 0.1);">
+    <div class="card" id="wallet-card-section"
+      style="margin-bottom: 32px; padding: 32px 40px; border-color: rgba(255, 255, 255, 0.1);">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px;">
         <div>
           <div class="card-title" style="font-size: 1.25rem;">Blockchain Identity Engine</div>
-          <div class="card-subtitle" style="font-size: 0.9rem;">Anchoring credentials to Polygon Amoy for immutability.</div>
-          <div id="issuer-wallet-address" style="margin-top: 12px; font-size: 0.95rem; color: var(--accent); opacity: 0.9; font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', monospace; letter-spacing: -0.2px;">
+          <div class="card-subtitle" style="font-size: 0.9rem;">Anchoring credentials to Polygon Amoy for immutability.
+          </div>
+          <div id="issuer-wallet-address"
+            style="margin-top: 12px; font-size: 0.95rem; color: var(--accent); opacity: 0.9; font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', monospace; letter-spacing: -0.2px;">
             Not connected to engine
           </div>
         </div>
         <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
-          <button class="btn btn-primary" id="btn-connect-issuer-wallet" style="padding: 14px 32px; font-size: 1rem; width: 240px;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;"><path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7"></path><path d="M16 19h6"></path><path d="M19 16v6"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          <button class="btn btn-primary" id="btn-connect-issuer-wallet"
+            style="padding: 14px 32px; font-size: 1rem; width: 240px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              style="margin-right: 8px;">
+              <path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7"></path>
+              <path d="M16 19h6"></path>
+              <path d="M19 16v6"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
             Connect MetaMask
           </button>
           <div id="issuer-wallet-status" class="status-indicator">
             <span class="dot inactive"></span>
-            <span style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Disconnected</span>
+            <span
+              style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Disconnected</span>
           </div>
         </div>
       </div>
@@ -547,9 +825,9 @@
 
 
     <!-- Issue Section -->
-    <div id="issue-section">
+    <div id="issue-section" style="display: none;">
       <h2 class="section-title">Issue Credential</h2>
-      
+
       <div id="type-selector" style="margin-bottom: 24px;"></div>
 
       <div class="card">
@@ -571,7 +849,8 @@
           </div>
           <div class="form-group">
             <label class="form-label">Issuer DID</label>
-            <input type="text" class="form-input" id="issuer-did" value="did:web:shivnadar.university" readonly style="opacity:0.5;">
+            <input type="text" class="form-input" id="issuer-did" value="did:web:shivnadar.university" readonly
+              style="opacity:0.5;">
           </div>
           <div class="form-group">
             <label class="form-label">Student Email (Cloud Mode)</label>
@@ -588,8 +867,19 @@
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Upload Evidence (.pdf, .png)</label>
-            <input type="file" class="form-input" id="source-doc-file" accept=".pdf,.png,.jpg,.jpeg">
+            <label class="form-label">Upload Evidence</label>
+            <label for="source-doc-file" class="upload-zone" id="upload-zone">
+              <input type="file" id="source-doc-file" accept=".pdf,.png,.jpg,.jpeg" style="display: none;">
+              <div class="upload-zone-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+              </div>
+              <div class="upload-zone-text" id="upload-zone-text">Click to share evidence</div>
+              <div class="upload-zone-sub" id="upload-zone-sub">PDF/PNG (Max 2MB)</div>
+            </label>
           </div>
         </div>
       </div>
@@ -614,28 +904,34 @@
           <p class="card-subtitle">Overview of all issued academic records and their verification status.</p>
         </div>
         <div style="display:flex; gap: 12px;">
-           <input type="text" class="form-input" id="search-credentials" placeholder="Search by name or ID..." style="min-width: 260px; padding: 8px 16px;">
+          <input type="text" class="form-input" id="search-credentials" placeholder="Search by name or ID..."
+            style="min-width: 260px; padding: 8px 16px;">
         </div>
       </div>
 
       <!-- Stats Moved Here -->
       <div class="stats-row" id="stats-row">
-        <div class="stat-card" style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);">
+        <div class="stat-card"
+          style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);">
           <div class="stat-value" id="stat-total">0</div>
           <div class="stat-label">Total Issued</div>
         </div>
-        <div class="stat-card" style="background: linear-gradient(135deg, rgba(34,197,94,0.05) 0%, rgba(34,197,94,0.01) 100%);">
+        <div class="stat-card"
+          style="background: linear-gradient(135deg, rgba(34,197,94,0.05) 0%, rgba(34,197,94,0.01) 100%);">
           <div class="stat-value" id="stat-claimed" style="color: #4ade80;">0</div>
           <div class="stat-label">Successfully Claimed</div>
         </div>
-        <div class="stat-card" style="background: linear-gradient(135deg, rgba(239,68,68,0.05) 0%, rgba(239,68,68,0.01) 100%);">
+        <div class="stat-card"
+          style="background: linear-gradient(135deg, rgba(239,68,68,0.05) 0%, rgba(239,68,68,0.01) 100%);">
           <div class="stat-value" id="stat-revoked" style="color: #f87171;">0</div>
           <div class="stat-label">Revoked Records</div>
         </div>
       </div>
 
-      <div class="card" style="padding: 24px; border-style: dashed; opacity: 0.8; margin-bottom: 24px; display: none;" id="search-info">
-        <div style="font-size: 0.85rem; color: var(--silver);">Showing results for "<span id="search-query"></span>"</div>
+      <div class="card" style="padding: 24px; border-style: dashed; opacity: 0.8; margin-bottom: 24px; display: none;"
+        id="search-info">
+        <div style="font-size: 0.85rem; color: var(--silver);">Showing results for "<span id="search-query"></span>"
+        </div>
       </div>
 
       <div id="issued-list"></div>
@@ -660,7 +956,16 @@
           <tbody id="audit-body"></tbody>
         </table>
         <div id="audit-empty" class="empty-state">
-          <div class="empty-state-icon">📜</div>
+          <div class="empty-state-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+              style="opacity: 0.3; margin-bottom: 12px;">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
           <div>The audit trail is currently empty.</div>
         </div>
       </div>
@@ -673,8 +978,8 @@
     function showTab(tab) {
       document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
       const activeBtn = Array.from(document.querySelectorAll('.tab-item')).find(b => b.textContent.toLowerCase().includes(tab));
-      if(activeBtn) activeBtn.classList.add('active');
-      
+      if (activeBtn) activeBtn.classList.add('active');
+
       document.getElementById('issue-section').style.display = tab === 'issue' ? 'block' : 'none';
       document.getElementById('dashboard-section').style.display = tab === 'dashboard' ? 'block' : 'none';
       document.getElementById('audit-section').style.display = tab === 'audit' ? 'block' : 'none';
@@ -695,4 +1000,5 @@
   <script src="js/biometric-auth.js?v=20260328-10"></script>
   <script src="js/college.js?v=20260328-10"></script>
 </body>
+
 </html>
