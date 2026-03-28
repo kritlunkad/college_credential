@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Verifier Portal — Verify student credentials cryptographically. Check issuer signatures and ZKP range proofs.">
+  <title>Verifier Portal — CredChain Verify</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        <div class="nav-brand-icon">⟐</div>
+        CredChain
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="college.html" class="nav-link"><span class="nav-role-badge issuer">Issuer</span> College</a></li>
+        <li><a href="wallet.html" class="nav-link"><span class="nav-role-badge holder">Holder</span> Wallet</a></li>
+        <li><a href="verifier.html" class="nav-link active"><span class="nav-role-badge verifier">Verifier</span> Verify</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div class="page-header">
+      <h1 class="page-title">
+        🔍 <span class="gradient-text">Verifier Portal</span>
+      </h1>
+      <p class="page-subtitle">Verify student credentials instantly. Enter a verification code or scan a QR to check the issuer's digital signature and validate any ZKP range proofs.</p>
+    </div>
+
+    <!-- Verification Input -->
+    <div class="section">
+      <h2 class="section-title">Verify a credential</h2>
+      <div class="card">
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: var(--space-md);">
+          Enter the verification code provided by the student. The system will check:
+        </p>
+        <ul style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: var(--space-lg); padding-left: var(--space-lg); list-style: none;">
+          <li style="margin-bottom: 4px;">🔏 <strong style="color:var(--text-secondary);">Issuer signature</strong> — Is the credential signed by a trusted institution?</li>
+          <li style="margin-bottom: 4px;">🛡️ <strong style="color:var(--text-secondary);">Data integrity</strong> — Has the credential been tampered with?</li>
+          <li style="margin-bottom: 4px;">⏱️ <strong style="color:var(--text-secondary);">Expiry check</strong> — Is the credential still valid?</li>
+          <li style="margin-bottom: 4px;">⛔ <strong style="color:var(--text-secondary);">Revocation check</strong> — Has the issuer revoked the credential?</li>
+          <li style="margin-bottom: 4px;">🔄 <strong style="color:var(--text-secondary);">Replay detection</strong> — Has this presentation been used before?</li>
+          <li style="margin-bottom: 4px;">🧮 <strong style="color:var(--text-secondary);">ZKP proofs</strong> — Are the range claims mathematically valid?</li>
+        </ul>
+        <div class="claim-bar">
+          <input type="text" class="form-input" id="verify-code" placeholder="e.g. A3B7K9XZ" style="text-transform:uppercase; letter-spacing:0.1em; font-weight:600;">
+          <button class="btn btn-primary" id="btn-verify">🔍 Verify</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verification Result -->
+    <div class="section" id="result-section" style="display:none;">
+      <h2 class="section-title">Verification result</h2>
+      <div class="card" id="result-card"></div>
+    </div>
+
+    <!-- Trusted Issuers -->
+    <div class="section">
+      <h2 class="section-title">Trusted issuers</h2>
+      <div id="issuers-list"></div>
+      <div id="issuers-empty" class="empty-state" style="padding: var(--space-xl);">
+        <div class="empty-state-icon">🏛️</div>
+        <div class="empty-state-title">No issuers registered</div>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Issuers are registered automatically when the College Portal generates key pairs.</p>
+      </div>
+    </div>
+
+    <!-- Verification History -->
+    <div class="section">
+      <h2 class="section-title">Verification history</h2>
+      <div id="history-list"></div>
+      <div id="history-empty" class="empty-state" style="padding: var(--space-xl);">
+        <div class="empty-state-icon">📜</div>
+        <div class="empty-state-title">No verifications yet</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="js/snarkjs.min.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/crypto.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/verifier.js"></script>
+</body>
+</html>

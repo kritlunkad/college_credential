@@ -1,0 +1,15 @@
+1,2,0,main.gpa
+2,1,0,main.threshold
+3,10,0,main.diff
+4,10,1,main.pos.in
+5,13,1,main.pos.out
+6,11,1,main.pos.diff
+7,11,2,main.pos.bits.in
+8,12,2,main.pos.bits.out[0]
+9,3,2,main.pos.bits.out[1]
+10,4,2,main.pos.bits.out[2]
+11,5,2,main.pos.bits.out[3]
+12,6,2,main.pos.bits.out[4]
+13,7,2,main.pos.bits.out[5]
+14,8,2,main.pos.bits.out[6]
+15,9,2,main.pos.bits.out[7]

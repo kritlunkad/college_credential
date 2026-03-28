@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Student Credential Wallet — Claim, hold, and selectively share your verifiable academic credentials.">
+  <title>Student Wallet — CredChain Holder</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        <div class="nav-brand-icon">⟐</div>
+        CredChain
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="college.html" class="nav-link"><span class="nav-role-badge issuer">Issuer</span> College</a></li>
+        <li><a href="wallet.html" class="nav-link active"><span class="nav-role-badge holder">Holder</span> Wallet</a></li>
+        <li><a href="verifier.html" class="nav-link"><span class="nav-role-badge verifier">Verifier</span> Verify</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div class="page-header">
+      <h1 class="page-title">
+        👛 <span class="gradient-text">Student Wallet</span>
+      </h1>
+      <p class="page-subtitle">Your credentials, your control. Claim credentials issued by your college, then selectively share them with verifiers using toggle switches.</p>
+    </div>
+
+    <!-- Claim Credentials -->
+    <div class="section">
+      <h2 class="section-title">Claim your credentials</h2>
+      <div class="card">
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: var(--space-md);">
+          Enter your enrollment ID to claim credentials issued by your college.
+        </p>
+        <div class="claim-bar">
+          <input type="text" class="form-input" id="claim-enrollment-id" placeholder="e.g. SNU2024001">
+          <button class="btn btn-primary" id="btn-claim">🔑 Claim</button>
+        </div>
+        <div id="claim-result" style="margin-top: var(--space-md);"></div>
+      </div>
+    </div>
+
+    <!-- My Credentials -->
+    <div class="section">
+      <h2 class="section-title">My credentials</h2>
+      <div class="credential-grid" id="wallet-cards"></div>
+      <div id="wallet-empty" class="empty-state">
+        <div class="empty-state-icon">👛</div>
+        <div class="empty-state-title">No credentials in your wallet</div>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Claim credentials above using your enrollment ID.</p>
+      </div>
+    </div>
+
+    <!-- My Presentations -->
+    <div class="section">
+      <h2 class="section-title">Shared presentations</h2>
+      <div id="presentations-list"></div>
+      <div id="presentations-empty" class="empty-state" style="padding: var(--space-xl);">
+        <div class="empty-state-icon">📤</div>
+        <div class="empty-state-title">No presentations yet</div>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Share a credential to generate a verifiable presentation.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Share Modal -->
+  <div class="modal-overlay" id="share-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="share-modal-title">Share Credential</h3>
+        <button class="modal-close" id="share-modal-close">✕</button>
+      </div>
+      <div id="share-modal-body"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="share-modal-cancel">Cancel</button>
+        <button class="btn btn-success" id="share-modal-confirm">📤 Generate Presentation</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Presentation Result Modal -->
+  <div class="modal-overlay" id="result-modal">
+    <div class="modal" style="text-align:center;">
+      <div class="modal-header">
+        <h3 class="modal-title">Presentation Created!</h3>
+        <button class="modal-close" id="result-modal-close">✕</button>
+      </div>
+      <div id="result-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Credential Detail Modal -->
+  <div class="modal-overlay" id="detail-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="detail-modal-title">Credential Details</h3>
+        <button class="modal-close" id="detail-modal-close">✕</button>
+      </div>
+      <div id="detail-modal-body"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="detail-modal-dismiss">Close</button>
+        <button class="btn btn-success" id="detail-modal-share">📤 Share This</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="js/qrcode.min.js"></script>
+  <script src="js/snarkjs.min.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/crypto.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/wallet.js"></script>
+</body>
+</html>

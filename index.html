@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Decentralized college credential verification system with cryptographic proofs and selective disclosure. Issue, hold, and verify academic credentials.">
+  <title>CredChain — Decentralized College Credentials</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        <div class="nav-brand-icon">⟐</div>
+        CredChain
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link active">Home</a></li>
+        <li><a href="college.html" class="nav-link"><span class="nav-role-badge issuer">Issuer</span> College</a></li>
+        <li><a href="wallet.html" class="nav-link"><span class="nav-role-badge holder">Holder</span> Wallet</a></li>
+        <li><a href="verifier.html" class="nav-link"><span class="nav-role-badge verifier">Verifier</span> Verify</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h1 class="hero-title">
+      <span class="gradient-text">Stronger verification,</span><br>
+      less fraud
+    </h1>
+    <p class="hero-subtitle">
+      Stop forged transcripts, fake degrees, and impersonation with secure, cryptographic credentials.
+      Built on the W3C Verifiable Credentials trust triangle — students own their data, colleges sign it,
+      and anyone can verify it instantly.
+    </p>
+    <div class="hero-cta">
+      <a href="college.html" class="btn btn-primary btn-lg">🏫 Issue Credentials</a>
+      <a href="wallet.html" class="btn btn-success btn-lg">👛 Open Wallet</a>
+      <a href="verifier.html" class="btn btn-ghost btn-lg">🔍 Verify a Student</a>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <div class="page">
+    <div class="section">
+      <h2 class="section-title">How it works</h2>
+      <div class="flow-steps">
+        <div class="flow-step card">
+          <div class="flow-step-number">1</div>
+          <h3 class="flow-step-title">College Issues</h3>
+          <p class="flow-step-desc">
+            The university digitally signs academic credentials (transcripts, identity, achievements) with their
+            private key. The public key is embedded in the credential for self-contained verification.
+          </p>
+        </div>
+        <div class="flow-step card">
+          <div class="flow-step-number">2</div>
+          <h3 class="flow-step-title">Student Holds</h3>
+          <p class="flow-step-desc">
+            Credentials live in the student's wallet — not in a central database. Students control what they
+            share using toggle switches, and can prove claims (like GPA&nbsp;>&nbsp;8.0) without revealing exact values.
+          </p>
+        </div>
+        <div class="flow-step card">
+          <div class="flow-step-number">3</div>
+          <h3 class="flow-step-title">Third Party Verifies</h3>
+          <p class="flow-step-desc">
+            Employers, scholarship boards, or any verifier enters a code or scans a QR. The system checks the
+            issuer's digital signature and validates any ZKP range proofs — instant, mathematical trust.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features -->
+    <div class="section">
+      <h2 class="section-title">Built for trust</h2>
+      <div class="features-grid">
+        <div class="feature-card card">
+          <div class="feature-icon">🔐</div>
+          <h3 class="feature-title">Cryptographic Signatures</h3>
+          <p class="feature-desc">
+            ECDSA P-256 digital signatures via Web Crypto API. Every credential is mathematically bound
+            to the issuing institution — tamper-proof by design.
+          </p>
+        </div>
+        <div class="feature-card card">
+          <div class="feature-icon">🎛️</div>
+          <h3 class="feature-title">Selective Disclosure</h3>
+          <p class="feature-desc">
+            Students choose exactly which fields to share. Show your major without revealing your GPA,
+            or prove enrollment without exposing personal details.
+          </p>
+        </div>
+        <div class="feature-card card">
+          <div class="feature-icon">🧮</div>
+          <h3 class="feature-title">Zero-Knowledge Proofs</h3>
+          <p class="feature-desc">
+            Prove your GPA is above a threshold without revealing the exact number. SHA-256 commitment
+            binds the range claim to the signed credential.
+          </p>
+        </div>
+        <div class="feature-card card">
+          <div class="feature-icon">📱</div>
+          <h3 class="feature-title">QR Code Sharing</h3>
+          <p class="feature-desc">
+            Generate a QR code for any verifiable presentation. Verifiers scan and get instant results — 
+            perfect for in-person verification.
+          </p>
+        </div>
+        <div class="feature-card card">
+          <div class="feature-icon">⏱️</div>
+          <h3 class="feature-title">Expiry & Revocation</h3>
+          <p class="feature-desc">
+            Credentials expire naturally, and issuers can revoke them. The verifier checks both before
+            accepting any proof.
+          </p>
+        </div>
+        <div class="feature-card card">
+          <div class="feature-icon">🏛️</div>
+          <h3 class="feature-title">Multi-Issuer Trust</h3>
+          <p class="feature-desc">
+            Support credentials from multiple institutions. Each issuer registers their own key pair — 
+            verifiers trust the cryptography, not a single database.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trust Triangle Diagram -->
+    <div class="section" style="text-align:center; padding: var(--space-2xl) 0;">
+      <h2 class="section-title">The trust triangle</h2>
+      <div class="card" style="display:inline-block; padding: var(--space-2xl); max-width: 600px;">
+        <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 2;">
+          <div style="margin-bottom: var(--space-lg);">
+            <span style="font-size: 2rem;">🏫</span><br>
+            <strong style="color: var(--text-primary);">Issuer</strong> (College)<br>
+            Signs credentials with private key
+          </div>
+          <div style="display: flex; justify-content: space-between; max-width: 400px; margin: 0 auto;">
+            <div>
+              <span style="font-size: 2rem;">👛</span><br>
+              <strong style="color: var(--text-primary);">Holder</strong> (Student)<br>
+              Controls & selectively shares
+            </div>
+            <div>
+              <span style="font-size: 2rem;">🔍</span><br>
+              <strong style="color: var(--text-primary);">Verifier</strong> (Third Party)<br>
+              Checks signature & proofs
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer style="text-align:center; padding: var(--space-2xl); border-top: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.8rem;">
+    CredChain — Hackathon Demo · Built with W3C Verifiable Credentials concepts · 
+    <a href="https://www.w3.org/TR/vc-data-model/" target="_blank" style="color: var(--accent-indigo-light);">W3C VC Spec</a>
+  </footer>
+
+</body>
+</html>
