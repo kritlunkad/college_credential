@@ -763,20 +763,20 @@
 
   <nav class="nav" id="nav">
     <div class="nav-inner">
-      <a href="index.html" class="nav-brand">
+      <a href="index.html" class="nav-brand" style="align-items: center; gap: 12px;">
         <img src="assets/trustlessid logo.png" alt="TrustlessID Logo"
-          style="height: 70px; width: auto; object-fit: contain;">
-        CredChain <span
-          style="font-size: 0.75rem; color: var(--bone); font-weight: 700; margin-left: 16px; padding: 4px 12px; background: rgba(255,255,255,0.06); border-radius: 100px; border: 1px solid rgba(255,255,255,0.12); letter-spacing: 0.5px; text-transform: uppercase;">STUDENT
-          WALLET</span>
+          style="height: 48px; width: auto; object-fit: contain;">
+        <div style="display: flex; flex-direction: column; justify-content: center; transform: translateY(2px);">
+          <span style="line-height: 1; font-size: 1.25rem;">CredChain</span>
+          <span
+            style="font-size: 0.75rem; color: var(--silver); font-weight: 500; margin-top: 4px; letter-spacing: 0.5px;">Student
+            Wallet</span>
+        </div>
       </a>
-      <ul class="nav-links">
+      <ul class="nav-links" style="display: flex; align-items: center; gap: 16px;">
         <li><a href="college.html" class="nav-link">Issuer Portal</a></li>
-        <li>
-          <div class="status-indicator">
-            <span class="dot"></span>
-            <span>Holder Active</span>
-          </div>
+        <li><button class="btn btn-sm" id="nav-logout-btn"
+            style="border-radius: 100px; padding: 6px 16px; background: transparent; color: #e57373; border: 1px solid rgba(229, 115, 115, 0.3); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.5px;">Logout</button>
         </li>
       </ul>
     </div>
@@ -815,7 +815,17 @@
           Sign in with Google
         </button>
         <button class="btn btn-ghost btn-sm" id="btn-student-logout">Logout</button>
-        <button class="btn btn-ghost btn-sm" id="btn-student-biometric">🧬 Biometric Auth</button>
+        <button class="btn btn-ghost btn-sm" id="btn-student-biometric"
+          style="display: inline-flex; align-items: center; gap: 6px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10"></path>
+            <path d="M5 12c0-3.87 3.13-7 7-7s7 3.13 7 7"></path>
+            <path d="M8.29 12c0-2.05 1.66-3.71 3.71-3.71s3.71 1.66 3.71 3.71"></path>
+            <path d="M12 12v.01"></path>
+          </svg>
+          Biometric Auth
+        </button>
       </div>
       <div id="student-auth-status" style="font-size:0.75rem; color:var(--silver); margin-top: 16px; opacity:0.6;">Not
         authenticated</div>
