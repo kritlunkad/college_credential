@@ -13,19 +13,34 @@ module.exports = async function handler(req, res) {
 
     const db = getDb();
     const adminUser = isAdminUser(authUser);
+    const bindingId = `${authUser.uid}_${enrollmentId}`;
+    const bindingSnap = await db.collection('studentEnrollmentBindings').doc(bindingId).get();
+    const hasBinding = bindingSnap.exists;
+
+    const q = await db.collection('credentials').where('enrollmentId', '==', enrollmentId).get();
+    const rows = q.docs.map((d) => d.data()).filter(Boolean);
+    let credentials = rows.map((r) => r.credential).filter(Boolean);
 
     if (!adminUser) {
-      const bindingId = `${authUser.uid}_${enrollmentId}`;
-      const bindingSnap = await db.collection('studentEnrollmentBindings').doc(bindingId).get();
-      if (!bindingSnap.exists) {
+      const email = (authUser.email || '').trim().toLowerCase();
+      credentials = rows
+        .filter((r) => {
+          if (!r.credential) return false;
+          const assignedEmail = (r.studentEmail || r.credential.credentialSubject?.studentEmail || '').trim().toLowerCase();
+          const assignedUid = r.studentUid || r.credential.credentialSubject?.studentUid || null;
+          if (assignedUid && assignedUid === authUser.uid) return true;
+          if (assignedEmail && email && assignedEmail === email) return true;
+          if (hasBinding) return true;
+          return false;
+        })
+        .map((r) => r.credential);
+      if (credentials.length === 0) {
         return sendJson(res, 403, {
-          error: 'Enrollment is not linked to this account. Bind enrollment first.',
+          error: 'No assigned credentials for this enrollment ID and user.',
         });
       }
     }
 
-    const q = await db.collection('credentials').where('enrollmentId', '==', enrollmentId).get();
-    const credentials = q.docs.map((d) => d.data().credential).filter(Boolean);
     return sendJson(res, 200, { ok: true, credentials });
   } catch (e) {
     return sendJson(res, 500, { error: e.message || 'Credentials API failed' });

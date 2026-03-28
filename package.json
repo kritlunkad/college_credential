@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "vercel dev"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
@@ -13,6 +12,7 @@
   "dependencies": {
     "circomlib": "^2.0.5",
     "firebase-admin": "^12.7.0",
+    "nodemailer": "^6.10.1",
     "qrcode": "^1.5.4",
     "snarkjs": "^0.7.6"
   }

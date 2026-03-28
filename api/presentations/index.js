@@ -12,6 +12,7 @@ module.exports = async function handler(req, res) {
     if (!presentation || !presentation.verificationCode) {
       return sendJson(res, 400, { error: 'presentation.verificationCode is required' });
     }
+    const serializedPresentation = JSON.stringify(presentation);
 
     const db = getDb();
     const code = presentation.verificationCode;
@@ -28,7 +29,9 @@ module.exports = async function handler(req, res) {
       code,
       ownerUid: authUser.uid,
       ownerEmail: authUser.email || null,
-      presentation,
+      presentationJson: serializedPresentation,
+      credentialId: presentation.credential?.id || null,
+      issuerName: presentation.credential?.issuer?.name || null,
       updatedAt: new Date().toISOString(),
       createdAt: existing.exists ? existing.data().createdAt : new Date().toISOString(),
     }, { merge: true });

@@ -58,6 +58,13 @@
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   }
 
+  function generateClaimCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let out = '';
+    for (let i = 0; i < 8; i++) out += chars[Math.floor(Math.random() * chars.length)];
+    return out;
+  }
+
   function renderIssuerWallet() {
     const statusEl = document.getElementById('issuer-wallet-status');
     const addressEl = document.getElementById('issuer-wallet-address');
@@ -295,10 +302,18 @@
     const issuerName = document.getElementById('issuer-name').value.trim();
     const issuerDid = document.getElementById('issuer-did').value.trim();
     const expiryDays = parseInt(document.getElementById('expiry-days').value) || 365;
+    const assignedStudentEmail = document.getElementById('assigned-student-email').value.trim().toLowerCase();
 
     if (!issuerWalletAddress) {
       showToast('Connect the issuer MetaMask wallet before issuing', 'error');
       return;
+    }
+    if (cloudAuthEnabled && !assignedStudentEmail) {
+      showToast('Assigned Student Email is required in cloud mode', 'error');
+      return;
+    }
+    if (assignedStudentEmail) {
+      subjectData.studentEmail = assignedStudentEmail;
     }
 
     if (typeof BiometricAuth !== 'undefined' && BiometricAuth.isEnabled()) {
@@ -318,6 +333,10 @@
 
     // Build credential
     const credential = buildCredential(type, subjectData, issuer, expiryDays);
+    credential.claimCode = generateClaimCode();
+    credential.emailDelivery = assignedStudentEmail
+      ? { status: 'pending', reason: null, sentAt: null, email: assignedStudentEmail }
+      : { status: 'not_configured', reason: 'student email missing', sentAt: null, email: null };
 
     // Embed issuer's public key for self-contained verification
     credential.issuerPublicKey = publicKeyJwk;
@@ -337,15 +356,32 @@
     Store.saveCredential(credential);
     if (cloudAuthEnabled && typeof CloudApi !== 'undefined') {
       try {
-        await CloudApi.issueCredential(credential);
+        const cloudRes = await CloudApi.issueCredential(credential, assignedStudentEmail);
+        if (cloudRes.claimCode) {
+          credential.claimCode = cloudRes.claimCode;
+          Store.updateCredentialById(credential.id, { claimCode: cloudRes.claimCode });
+        }
+        if (cloudRes.email?.sent) {
+          const sentAt = cloudRes.email?.sentAt || new Date().toISOString();
+          credential.emailDelivery = { status: 'sent', reason: null, sentAt, email: assignedStudentEmail || null };
+          Store.updateCredentialById(credential.id, { emailDelivery: credential.emailDelivery });
+          showToast(`Claim code emailed to ${assignedStudentEmail}`, 'success');
+        } else if (assignedStudentEmail) {
+          const reason = cloudRes.email?.reason || 'email not configured';
+          credential.emailDelivery = { status: 'failed', reason, sentAt: null, email: assignedStudentEmail };
+          Store.updateCredentialById(credential.id, { emailDelivery: credential.emailDelivery });
+          showToast(`Issued, but email not sent: ${reason}`, 'error');
+        }
       } catch (e) {
+        credential.emailDelivery = { status: 'failed', reason: e.message || 'cloud sync failed', sentAt: null, email: assignedStudentEmail || null };
+        Store.updateCredentialById(credential.id, { emailDelivery: credential.emailDelivery });
         showToast(`Credential issued locally, cloud sync failed: ${e.message}`, 'error');
       }
     }
     Store.appendAuditLog({
       event: 'issued',
       actor: issuerName,
-      details: `${type.label} issued to ${subjectData.name} (${subjectData.enrollmentId})`,
+      details: `${type.label} issued to ${subjectData.name} (${subjectData.enrollmentId}) · ClaimCode: ${credential.claimCode}`,
       credentialId: credential.id,
     });
 
@@ -384,6 +420,13 @@
       const isRevoked = Store.isRevoked(cred.id);
       const isClaimed = Store.isCredentialClaimed(cred.id);
       const expiry = getExpiryStatus(cred.expirationDate);
+      const emailStatus = cred.emailDelivery?.status;
+      let emailBadge = '';
+      if (emailStatus === 'sent') emailBadge = '<span class="badge badge-valid">Email Sent</span>';
+      else if (emailStatus === 'failed') emailBadge = '<span class="badge badge-failed">Email Failed</span>';
+      else if (emailStatus === 'pending') emailBadge = '<span class="badge badge-expiring">Email Pending</span>';
+      else if (emailStatus === 'not_configured') emailBadge = '<span class="badge badge-expiring">Email Not Set</span>';
+      const emailReason = cred.emailDelivery?.reason ? ` · Email: ${cred.emailDelivery.reason}` : '';
 
       const card = document.createElement('div');
       card.className = 'credential-mini fade-in';
@@ -396,10 +439,11 @@
             ${typeInfo.label} — ${cred.credentialSubject.name}
             ${isRevoked ? '<span class="badge badge-revoked">Revoked</span>' : ''}
             ${isClaimed ? '<span class="badge badge-valid">Claimed</span>' : ''}
+            ${emailBadge}
             <span class="badge ${expiry.class}">${expiry.label}</span>
           </div>
           <div class="credential-mini-sub">
-            ${cred.credentialSubject.enrollmentId} · ID: ${cred.id} · Issued: ${new Date(cred.issuanceDate).toLocaleDateString()}
+            ${cred.credentialSubject.enrollmentId} · Claim Code: <strong>${cred.claimCode || '—'}</strong> · ID: ${cred.id} · Issued: ${new Date(cred.issuanceDate).toLocaleDateString()}${emailReason}
           </div>
         </div>
         ${!isRevoked ? `<button class="btn btn-danger btn-sm" data-revoke="${cred.id}">Revoke</button>` : ''}

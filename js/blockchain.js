@@ -154,7 +154,19 @@ const BlockchainModule = (() => {
     const signer = await provider.getSigner();
     const from = await signer.getAddress();
     const contract = new ethers.Contract(cfg.CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-    const tx = await contract.storeHash(hash);
+    // Amoy can reject txs with too-low priority fee; enforce a sane floor.
+    const feeData = await provider.getFeeData();
+    const minTip = ethers.parseUnits('30', 'gwei');
+    const priorityFee = feeData.maxPriorityFeePerGas && feeData.maxPriorityFeePerGas > minTip
+      ? feeData.maxPriorityFeePerGas
+      : minTip;
+    const baseOrMax = feeData.maxFeePerGas || feeData.gasPrice || ethers.parseUnits('60', 'gwei');
+    const maxFee = baseOrMax > priorityFee ? baseOrMax : (priorityFee * 2n);
+
+    const tx = await contract.storeHash(hash, {
+      maxPriorityFeePerGas: priorityFee,
+      maxFeePerGas: maxFee,
+    });
     const receipt = await tx.wait();
     let anchorTime = null;
     try {

@@ -27,10 +27,10 @@ const CloudApi = (() => {
     return data;
   }
 
-  async function issueCredential(credential) {
+  async function issueCredential(credential, studentEmail = null) {
     return await request('/api/issue', {
       method: 'POST',
-      body: JSON.stringify({ credential }),
+      body: JSON.stringify({ credential, studentEmail }),
     });
   }
 
@@ -44,6 +44,11 @@ const CloudApi = (() => {
   async function fetchCredentials(enrollmentId) {
     const encoded = encodeURIComponent(enrollmentId);
     return await request(`/api/credentials/${encoded}`, { method: 'GET' });
+  }
+
+  async function fetchCredentialByClaimCode(claimCode) {
+    const encoded = encodeURIComponent(claimCode);
+    return await request(`/api/credentials/claim/${encoded}`, { method: 'GET' });
   }
 
   async function savePresentation(presentation) {
@@ -66,6 +71,7 @@ const CloudApi = (() => {
     issueCredential,
     bindEnrollment,
     fetchCredentials,
+    fetchCredentialByClaimCode,
     savePresentation,
     fetchPresentationByCode,
     fetchTrustedIssuers,

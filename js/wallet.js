@@ -117,6 +117,24 @@
   }
 
   // ── Claim Credentials ───────────────────────────────────────────
+  function claimCredentialLocally(cred) {
+    if (!cred || !cred.id) return false;
+    if (!Store.getCredentialById(cred.id)) {
+      Store.saveCredential(cred);
+    }
+    if (!Store.isCredentialClaimed(cred.id)) {
+      Store.claimCredential(cred.id);
+      Store.appendAuditLog({
+        event: 'claimed',
+        actor: 'Student Wallet',
+        details: `Claimed ${cred.type?.[1] || 'Credential'} (${cred.id})`,
+        credentialId: cred.id,
+      });
+      return true;
+    }
+    return false;
+  }
+
   async function claimCredentials() {
     const enrollmentId = document.getElementById('claim-enrollment-id').value.trim();
     const resultEl = document.getElementById('claim-result');
@@ -153,16 +171,7 @@
 
     let claimedCount = 0;
     matching.forEach(cred => {
-      if (!Store.isCredentialClaimed(cred.id)) {
-        Store.claimCredential(cred.id);
-        claimedCount++;
-        Store.appendAuditLog({
-          event: 'claimed',
-          actor: 'Student Wallet',
-          details: `Claimed ${cred.type[1]} (${cred.id})`,
-          credentialId: cred.id,
-        });
-      }
+      if (claimCredentialLocally(cred)) claimedCount++;
     });
 
     if (claimedCount > 0) {
@@ -173,6 +182,41 @@
     }
 
     renderWalletCards();
+  }
+
+  async function claimByCode() {
+    const codeInput = document.getElementById('claim-code');
+    const raw = (codeInput.value || '').trim().toUpperCase();
+    if (!raw) {
+      showToast('Enter claim code', 'error');
+      return;
+    }
+    if (cloudAuthEnabled && !studentUser) {
+      showToast('Student login required before claim-by-code', 'error');
+      return;
+    }
+    if (!cloudAuthEnabled || typeof CloudApi === 'undefined') {
+      showToast('Claim-by-code is available in cloud mode only', 'error');
+      return;
+    }
+
+    try {
+      const res = await CloudApi.fetchCredentialByClaimCode(raw);
+      const cred = res.credential;
+      if (!cred) {
+        showToast('No credential found for claim code', 'error');
+        return;
+      }
+      const claimed = claimCredentialLocally(cred);
+      const enrollmentId = cred.credentialSubject?.enrollmentId || '';
+      if (enrollmentId) {
+        document.getElementById('claim-enrollment-id').value = enrollmentId;
+      }
+      renderWalletCards();
+      showToast(claimed ? `Credential claimed via code ${raw}` : 'Credential already claimed', claimed ? 'success' : 'info');
+    } catch (e) {
+      showToast(`Claim-by-code failed: ${e.message}`, 'error');
+    }
   }
 
   // ── Render Wallet Cards ─────────────────────────────────────────
@@ -916,6 +960,7 @@
 
   // ── Event Listeners ─────────────────────────────────────────────
   document.getElementById('btn-claim').addEventListener('click', claimCredentials);
+  document.getElementById('btn-claim-code').addEventListener('click', claimByCode);
   document.getElementById('btn-connect-holder-wallet').addEventListener('click', () => connectHolderWallet(true));
   document.getElementById('btn-student-login').addEventListener('click', studentLogin);
   document.getElementById('btn-student-logout').addEventListener('click', studentLogout);
@@ -933,6 +978,9 @@
   });
   document.getElementById('claim-enrollment-id').addEventListener('keydown', e => {
     if (e.key === 'Enter') claimCredentials();
+  });
+  document.getElementById('claim-code').addEventListener('keydown', e => {
+    if (e.key === 'Enter') claimByCode();
   });
   document.getElementById('share-modal-close').addEventListener('click', () => closeModal('share-modal'));
   document.getElementById('share-modal-cancel').addEventListener('click', () => closeModal('share-modal'));
@@ -973,6 +1021,10 @@
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has('enrollment')) {
     document.getElementById('claim-enrollment-id').value = urlParams.get('enrollment');
+  }
+  if (urlParams.has('claimCode')) {
+    const code = (urlParams.get('claimCode') || '').toUpperCase();
+    document.getElementById('claim-code').value = code;
   }
 
   // ── Init ────────────────────────────────────────────────────────

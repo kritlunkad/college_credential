@@ -30,6 +30,22 @@
     }
   }
 
+  function canonicalize(value) {
+    if (Array.isArray(value)) return value.map(canonicalize);
+    if (value && typeof value === 'object') {
+      const out = {};
+      Object.keys(value).sort().forEach((k) => {
+        if (typeof value[k] !== 'undefined') out[k] = canonicalize(value[k]);
+      });
+      return out;
+    }
+    return value;
+  }
+
+  function jwkEqual(a, b) {
+    return JSON.stringify(canonicalize(a || {})) === JSON.stringify(canonicalize(b || {}));
+  }
+
   // Load verification key
   async function loadVerificationKey() {
     if (verificationKeyCache) return verificationKeyCache;
@@ -185,16 +201,23 @@
       // ── Check 5: Issuer Trust ─────────────────────────────────────
       const issuerName = cred.issuer.name.trim();
       const registeredKey = Store.getPublicKey(issuerName);
-      if (registeredKey) {
-        const keysMatch = JSON.stringify(cred.issuerPublicKey) === JSON.stringify(registeredKey);
+      const allTrustedKeys = typeof Store.getPublicKeys === 'function'
+        ? Store.getPublicKeys(issuerName)
+        : (registeredKey ? [registeredKey] : []);
+
+      if (allTrustedKeys.length > 0) {
+        const matchesCurrent = registeredKey ? jwkEqual(cred.issuerPublicKey, registeredKey) : false;
+        const matchesAny = allTrustedKeys.some((k) => jwkEqual(cred.issuerPublicKey, k));
         checks.push({
           label: 'Issuer Trust',
-          status: keysMatch ? 'pass' : 'warning',
-          detail: keysMatch
-            ? `Issuer "${issuerName}" is in the trusted registry with a matching public key`
-            : `⚠️ Issuer key does not match the registered key for "${issuerName}"`,
+          status: matchesAny ? 'pass' : 'warning',
+          detail: matchesAny
+            ? (matchesCurrent
+              ? `Issuer "${issuerName}" is in the trusted registry with a matching public key`
+              : `Issuer "${issuerName}" key matches a trusted historical key (key rotation detected)`)
+            : `⚠️ Issuer key does not match any trusted key for "${issuerName}"`,
         });
-        if (!keysMatch && overallStatus === 'success') overallStatus = 'warning';
+        if (!matchesAny && overallStatus === 'success') overallStatus = 'warning';
       } else {
         checks.push({
           label: 'Issuer Trust',

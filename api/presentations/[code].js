@@ -12,10 +12,20 @@ module.exports = async function handler(req, res) {
     if (!snap.exists) return sendJson(res, 404, { error: 'Presentation not found' });
 
     const data = snap.data();
+    let presentation = data.presentation || null;
+    if (!presentation && data.presentationJson) {
+      try {
+        presentation = JSON.parse(data.presentationJson);
+      } catch (e) {
+        return sendJson(res, 500, { error: 'Stored presentation JSON is corrupted' });
+      }
+    }
+    if (!presentation) return sendJson(res, 404, { error: 'Presentation payload not found' });
+
     return sendJson(res, 200, {
       ok: true,
       code,
-      presentation: data.presentation,
+      presentation,
       updatedAt: data.updatedAt || null,
     });
   } catch (e) {
