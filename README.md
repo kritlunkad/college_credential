@@ -5,7 +5,7 @@ Privacy-first academic credential issuance, sharing, and verification with:
 - ECDSA signatures
 - Selective disclosure
 - Groth16 ZK proofs
-- Optional blockchain hash anchoring (Polygon Amoy)
+- blockchain hash anchoring (Polygon Amoy)
 - Cloud sync + auth (Firebase + Vercel)
 
 ## What This Project Solves
