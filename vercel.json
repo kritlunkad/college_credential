@@ -1,0 +1,12 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "handle": "filesystem" },
+    { "src": "/college", "dest": "/college.html" },
+    { "src": "/wallet", "dest": "/wallet.html" },
+    { "src": "/verifier", "dest": "/verifier.html" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
+}
