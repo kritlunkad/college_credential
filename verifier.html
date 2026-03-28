@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Verifier Portal — Verify student credentials cryptographically. Check issuer signatures, ZKP range proofs, expiry, revocation, and blockchain anchoring.">
+  <meta name="description"
+    content="Verifier Portal — Verify student credentials cryptographically. Check issuer signatures, ZKP range proofs, expiry, revocation, and blockchain anchoring.">
   <title>Verifier Portal — CredChain Verify</title>
   <style>
     :root {
@@ -16,139 +18,458 @@
       --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: var(--obsidian); color: var(--bone); min-height: 100vh; overflow-x: hidden; line-height: 1.5; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--obsidian);
+      color: var(--bone);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
 
     /* ── Header ────────────────────────────────────────────── */
     .app-header {
-      padding: 24px 40px; border-bottom: 1px solid var(--ghost-border);
-      display: flex; justify-content: space-between; align-items: center;
-      position: sticky; top: 0; background: rgba(5, 5, 5, 0.8); backdrop-filter: blur(20px); z-index: 100;
+      padding: 24px 40px;
+      border-bottom: 1px solid var(--ghost-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: rgba(5, 5, 5, 0.8);
+      backdrop-filter: blur(20px);
+      z-index: 100;
     }
-    .app-brand { display: flex; align-items: center; gap: 12px; }
+
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
     .app-brand-icon {
-      width: 32px; height: 32px; background: var(--accent); color: var(--obsidian);
-      border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      color: var(--obsidian);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
     }
-    .app-brand-name { font-weight: 700; letter-spacing: -0.5px; font-size: 1.1rem; }
-    .status-indicator { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #4ade80; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 10px #4ade80; }
+
+    .app-brand-name {
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      font-size: 1.1rem;
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: #4ade80;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+      box-shadow: 0 0 10px #4ade80;
+    }
 
     /* ── Tab Navigation ─────────────────────────────────────── */
-    .tab-nav { padding: 24px 40px 0; max-width: 1200px; margin: 0 auto; display: flex; justify-content: center; }
+    .tab-nav {
+      padding: 24px 40px 0;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+    }
+
     .tab-bar {
-      display: flex; gap: 8px; background: var(--ghost); padding: 6px; border-radius: 12px; width: fit-content; border: 1px solid var(--ghost-border);
+      display: flex;
+      gap: 8px;
+      background: var(--ghost);
+      padding: 6px;
+      border-radius: 12px;
+      width: fit-content;
+      border: 1px solid var(--ghost-border);
     }
+
     .tab-item {
-      padding: 8px 18px; border-radius: 8px; border: none; background: transparent; color: var(--silver); font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: 0.3s;
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--silver);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.3s;
     }
-    .tab-item.active { background: var(--accent); color: var(--obsidian); }
+
+    .tab-item.active {
+      background: var(--accent);
+      color: var(--obsidian);
+    }
 
     /* ── Main Layout ───────────────────────────────────────── */
-    .app-container { max-width: 1000px; margin: 0 auto; padding: 48px 40px 80px; }
-    .page-title { font-size: 2.2rem; font-weight: 700; letter-spacing: -1px; margin-bottom: 12px; }
-    .page-subtitle { color: var(--silver); font-size: 1rem; max-width: 700px; margin-bottom: 40px; opacity: 0.8; }
-    .gradient-text { 
-      background: linear-gradient(90deg, #fff, #888); 
-      -webkit-background-clip: text; 
+    .app-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 48px 40px 80px;
+    }
+
+    .page-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+    }
+
+    .page-subtitle {
+      color: var(--silver);
+      font-size: 1rem;
+      max-width: 700px;
+      margin-bottom: 40px;
+      opacity: 0.8;
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg, #fff, #888);
+      -webkit-background-clip: text;
       background-clip: text;
-      -webkit-text-fill-color: transparent; 
+      -webkit-text-fill-color: transparent;
     }
 
     /* ── Verification Area ─────────────────────────────────── */
     .card {
-      background: var(--ghost); border: 1px solid var(--ghost-border); border-radius: 20px; padding: 32px; margin-bottom: 32px; transition: 0.3s;
+      background: var(--ghost);
+      border: 1px solid var(--ghost-border);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 32px;
+      transition: 0.3s;
     }
-    .card:hover { border-color: rgba(255, 255, 255, 0.15); }
-    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
 
-    .check-list { list-style: none; margin-bottom: 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 0.85rem; }
-    .check-list li { display: flex; align-items: center; gap: 10px; color: var(--silver); }
-    .check-list li svg { color: var(--accent); opacity: 0.6; }
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
 
-    .claim-bar { display: flex; gap: 12px; }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 32px;
+    }
+
+    .check-list {
+      list-style: none;
+      margin-bottom: 32px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      font-size: 0.85rem;
+    }
+
+    .check-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--silver);
+    }
+
+    .check-list li svg {
+      color: var(--accent);
+      opacity: 0.6;
+    }
+
+    .claim-bar {
+      display: flex;
+      gap: 12px;
+    }
+
     .form-input {
-      flex: 1; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--ghost-border);
-      color: var(--bone); padding: 14px 20px; border-radius: 12px; font-size: 0.95rem; outline: none; transition: 0.3s;
-      letter-spacing: 0.1em; font-family: 'SF Mono', 'Fira Code', monospace; font-weight: 600;
+      flex: 1;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--ghost-border);
+      color: var(--bone);
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: 0.3s;
+      letter-spacing: 0.1em;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-weight: 600;
     }
-    .form-input:focus { border-color: rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.06); }
+
+    .form-input:focus {
+      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.06);
+    }
 
     .btn {
-      padding: 12px 28px; border-radius: 100px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
-      display: inline-flex; align-items: center; gap: 8px; border: none; transition: 0.3s;
+      padding: 12px 28px;
+      border-radius: 100px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      transition: 0.3s;
     }
-    .btn-primary { background: var(--accent); color: var(--obsidian); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--obsidian);
+    }
 
     /* ── Verification Result Styles ────────────────────────── */
-    .verification-result { text-align: center; max-width: 680px; margin: 0 auto; }
-    .verification-icon {
-      width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-size: 2.5rem; margin: 0 auto 24px;
+    .verification-result {
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto;
     }
-    .verification-icon.success { background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
-    .verification-icon.warning { background: rgba(234, 179, 8, 0.1); color: #fbbf24; border: 1px solid rgba(234, 179, 8, 0.2); }
-    .verification-icon.failure { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
 
-    .verification-title { font-size: 1.8rem; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.5px; }
-    .verification-subtitle { color: var(--silver); opacity: 0.7; margin-bottom: 40px; }
-    
-    .verification-details { text-align: left; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--ghost-border); border-radius: 20px; padding: 32px; margin-top: 32px; }
+    .verification-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      margin: 0 auto 24px;
+    }
 
-    .credential-field { display: flex; justify-content: space-between; border-bottom: 1px solid var(--ghost-border); padding: 12px 0; }
-    .credential-field-label { color: var(--silver); opacity: 0.6; font-size: 0.85rem; }
-    .credential-field-value { font-weight: 600; font-size: 0.9rem; }
+    .verification-icon.success {
+      background: rgba(34, 197, 94, 0.1);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .verification-icon.warning {
+      background: rgba(234, 179, 8, 0.1);
+      color: #fbbf24;
+      border: 1px solid rgba(234, 179, 8, 0.2);
+    }
+
+    .verification-icon.failure {
+      background: rgba(239, 68, 68, 0.1);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .verification-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .verification-subtitle {
+      color: var(--silver);
+      opacity: 0.7;
+      margin-bottom: 40px;
+    }
+
+    .verification-details {
+      text-align: left;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--ghost-border);
+      border-radius: 20px;
+      padding: 32px;
+      margin-top: 32px;
+    }
+
+    .credential-field {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--ghost-border);
+      padding: 12px 0;
+    }
+
+    .credential-field-label {
+      color: var(--silver);
+      opacity: 0.6;
+      font-size: 0.85rem;
+    }
+
+    .credential-field-value {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
 
     .zkp-row {
-      display: flex; justify-content: space-between; align-items: center; padding: 16px; 
-      background: rgba(168, 85, 247, 0.05); border: 1px solid rgba(168, 85, 247, 0.15); border-radius: 12px; margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: rgba(168, 85, 247, 0.05);
+      border: 1px solid rgba(168, 85, 247, 0.15);
+      border-radius: 12px;
+      margin-bottom: 12px;
     }
-    .zkp-badge { background: rgba(168, 85, 247, 0.1); color: #c084fc; padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; }
 
-    .badge { padding: 4px 12px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
-    .badge-valid { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
-    .badge-expiring { background: rgba(234, 179, 8, 0.15); color: #fbbf24; }
-    .badge-failed { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    .zkp-badge {
+      background: rgba(168, 85, 247, 0.1);
+      color: #c084fc;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge {
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-valid {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+    }
+
+    .badge-expiring {
+      background: rgba(234, 179, 8, 0.15);
+      color: #fbbf24;
+    }
+
+    .badge-failed {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+    }
 
     /* ── Utilities ────────────────────────────────────────── */
-    .empty-state { text-align: center; padding: 80px 20px; color: var(--silver); opacity: 0.5; border: 1px dashed var(--ghost-border); border-radius: 20px; }
-    
-    .toast-container { position: fixed; bottom: 32px; right: 32px; z-index: 2000; display: flex; flex-direction: column; gap: 12px; }
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--silver);
+      opacity: 0.5;
+      border: 1px dashed var(--ghost-border);
+      border-radius: 20px;
+    }
+
+    .toast-container {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
     .toast {
-      background: #0A0A0A; border: 1px solid var(--ghost-border); color: var(--bone);
-      padding: 12px 20px; border-radius: 12px; font-size: 0.85rem; min-width: 240px;
-      display: flex; align-items: center; gap: 12px; backdrop-filter: blur(10px);
+      background: #0A0A0A;
+      border: 1px solid var(--ghost-border);
+      color: var(--bone);
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      min-width: 240px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      backdrop-filter: blur(10px);
     }
 
     .credential-mini {
-      background: rgba(255, 255, 255, 0.03); border: 1px solid var(--ghost-border); padding: 16px 20px; border-radius: 12px;
-      display: flex; align-items: center; gap: 16px; margin-bottom: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--ghost-border);
+      padding: 16px 20px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
     }
-    .credential-mini-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
-    .credential-mini-info { flex: 1; }
-    .credential-mini-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 2px; }
-    .credential-mini-sub { font-size: 0.75rem; color: var(--silver); opacity: 0.6; }
+
+    .credential-mini-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .credential-mini-info {
+      flex: 1;
+    }
+
+    .credential-mini-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 2px;
+    }
+
+    .credential-mini-sub {
+      font-size: 0.75rem;
+      color: var(--silver);
+      opacity: 0.6;
+    }
 
     /* ── Responsive ────────────────────────────────────────── */
     @media (max-width: 768px) {
-      .app-header { padding: 16px 20px; }
-      .app-container { padding: 32px 20px; }
-      .check-list { grid-template-columns: 1fr; }
-      .claim-bar { flex-direction: column; }
+      .app-header {
+        padding: 16px 20px;
+      }
+
+      .app-container {
+        padding: 32px 20px;
+      }
+
+      .check-list {
+        grid-template-columns: 1fr;
+      }
+
+      .claim-bar {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
+
 <body>
 
   <header class="app-header">
-    <div class="app-brand">
-      <img src="assets/trustlessid logo.png" alt="TrustlessID Logo" style="height: 26px; width: auto; object-fit: contain; margin-right: 4px;">
-      <div>
-        <div class="app-brand-name">CredChain</div>
+    <button onclick="window.location.href='index.html'" class="app-brand"
+      style="border: none; background: transparent; padding: 0; outline: none; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 4px;">
+      <img src="assets/trustlessid logo.png" alt="TrustlessID Logo"
+        style="height: 26px; width: auto; object-fit: contain; margin-right: 4px;">
+      <div style="line-height: normal;">
+        <div class="app-brand-name" style="color: var(--bone);">CredChain</div>
         <div class="app-brand-sub" style="font-size: 10px; color: #888;">Verifier Portal</div>
       </div>
-    </div>
-    <div class="app-header-right">
+    </button>
+    <div class="app-header-right" style="display: flex; align-items: center; gap: 24px;">
+      <a href="wallet.html"
+        style="color: var(--silver); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color 0.3s;"
+        onmouseover="this.style.color='var(--bone)'" onmouseout="this.style.color='var(--silver)'">Student Wallet</a>
+      <a href="college.html"
+        style="color: var(--silver); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color 0.3s;"
+        onmouseover="this.style.color='var(--bone)'" onmouseout="this.style.color='var(--silver)'">Issuer Portal</a>
+      <button class="btn btn-sm" id="nav-logout-btn"
+        style="border-radius: 100px; padding: 4px 14px; background: transparent; color: #e57373; border: 1px solid rgba(229, 115, 115, 0.3); font-weight: 600; font-size: 0.8rem; letter-spacing: 0.5px;">Logout</button>
     </div>
   </header>
 
@@ -163,7 +484,8 @@
   <main class="app-container">
     <div style="margin-bottom: 48px;">
       <h1 class="page-title"><span class="gradient-text">Instant</span> Verification</h1>
-      <p class="page-subtitle">Verify academic achievements with mathematical certainty. No phone calls, no portal access required—just cryptographic proof.</p>
+      <p class="page-subtitle">Verify academic achievements with mathematical certainty. No phone calls, no portal
+        access required—just cryptographic proof.</p>
     </div>
 
     <!-- Verification Input -->
@@ -174,24 +496,55 @@
             <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">Trust Engine Checks</div>
             <div style="font-size: 0.85rem; color: #888;">Automated cross-validation of entire payload</div>
           </div>
-          <div style="padding: 4px 12px; background: rgba(234, 179, 8, 0.1); color: #eab308; border-radius: 100px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Awaiting Input</div>
+          <div
+            style="padding: 4px 12px; background: rgba(234, 179, 8, 0.1); color: #eab308; border-radius: 100px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">
+            Awaiting Input</div>
         </div>
-        
+
         <ul class="check-list">
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> Issuer Signature</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg> Data Integrity</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Expiry Check</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Revocation Status</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> Replay Detection</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg> Blockchain Anchor</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Role Separation</li>
-          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><path d="M9 9h6v6H9z"></path></svg> ZKP Validation</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg> Issuer Signature</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg> Data Integrity</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg> Expiry Check</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg> Revocation Status</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg> Replay Detection</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg> Blockchain Anchor</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg> Role Separation</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+              <path d="M9 9h6v6H9z"></path>
+            </svg> ZKP Validation</li>
         </ul>
 
         <div class="claim-bar">
-          <input type="text" class="form-input" id="verify-code" placeholder="ENTER VERIFICATION CODE" style="text-transform:uppercase;">
+          <input type="text" class="form-input" id="verify-code" placeholder="ENTER VERIFICATION CODE"
+            style="text-transform:uppercase;">
           <button class="btn btn-primary" id="btn-verify">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
             Verify Now
           </button>
         </div>
@@ -210,7 +563,14 @@
       <div id="issuers-list"></div>
       <div id="issuers-empty" class="empty-state">
         <div style="margin-bottom: 12px; opacity: 0.3;">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 21h18"></path><path d="M3 7v1a3 3 0 0 0 6 0V7m6 0v1a3 3 0 0 0 6 0V7"></path><path d="M9 7v1a3 3 0 0 0 6 0V7"></path><path d="M4 21V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v17"></path><path d="M9 12h6"></path><path d="M9 16h6"></path></svg>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3 21h18"></path>
+            <path d="M3 7v1a3 3 0 0 0 6 0V7m6 0v1a3 3 0 0 0 6 0V7"></path>
+            <path d="M9 7v1a3 3 0 0 0 6 0V7"></path>
+            <path d="M4 21V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v17"></path>
+            <path d="M9 12h6"></path>
+            <path d="M9 16h6"></path>
+          </svg>
         </div>
         <div>No Institutions Found</div>
       </div>
@@ -222,7 +582,13 @@
       <div id="history-list"></div>
       <div id="history-empty" class="empty-state">
         <div style="margin-bottom: 12px; opacity: 0.3;">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
         </div>
         <div>No Verification History</div>
       </div>
@@ -235,8 +601,8 @@
     function showTab(tab) {
       document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
       const activeBtn = Array.from(document.querySelectorAll('.tab-item')).find(b => b.textContent.toLowerCase().includes(tab));
-      if(activeBtn) activeBtn.classList.add('active');
-      
+      if (activeBtn) activeBtn.classList.add('active');
+
       document.getElementById('verify-section').style.display = tab === 'verify' ? 'block' : 'none';
       document.getElementById('issuers-section').style.display = tab === 'issuers' ? 'block' : 'none';
       document.getElementById('history-section').style.display = tab === 'history' ? 'block' : 'none';
@@ -252,5 +618,24 @@
   <script src="js/blockchain.js?v=20260328-10"></script>
   <script src="js/cloud-api.js?v=20260328-10"></script>
   <script src="js/verifier.js?v=20260328-10"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const navLogoutBtn = document.getElementById('nav-logout-btn');
+      if (navLogoutBtn) {
+        navLogoutBtn.addEventListener('click', async () => {
+          if (typeof CloudAuth !== 'undefined') {
+            try {
+              await CloudAuth.signOut();
+              if (typeof showToast === 'function') showToast('Logged out', 'info');
+              setTimeout(() => { window.location.href = 'index.html'; }, 500);
+            } catch (e) {
+              if (typeof showToast === 'function') showToast(`Logout failed: ${e.message}`, 'error');
+            }
+          }
+        });
+      }
+    });
+  </script>
 </body>
+
 </html>
