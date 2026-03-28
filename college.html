@@ -506,10 +506,11 @@
     </div>
     <div class="app-header-right" style="display: flex; align-items: center; gap: 24px;">
       <a href="index.html" class="back-link">Home</a>
+      <button class="btn btn-ghost btn-sm" id="btn-header-logout" style="display: none; border: 1px solid rgba(255, 75, 75, 0.2); color: #ff4b4b; font-weight: 700; font-size: 0.7rem; padding: 4px 12px; background: rgba(255, 75, 75, 0.05);">Logout</button>
     </div>
   </header>
 
-  <nav class="tab-nav">
+  <nav class="tab-nav" id="main-nav" style="display: none;">
     <div class="tab-bar">
       <button class="tab-item active" onclick="showTab('issue')">Issue Credential</button>
       <button class="tab-item" onclick="showTab('dashboard')">Dashboard</button>
@@ -524,10 +525,11 @@
         <span class="gradient-text">Institution</span> Portal
       </h1>
       <p class="page-subtitle">Securely sign academic records. Every credential is mathematically bound to your identity via ECDSA signatures.</p>
+      <div id="welcome-message" style="display: none; margin-top: -20px; margin-bottom: 20px; font-size: 1.1rem; font-weight: 500; color: var(--accent);"></div>
     </div>
 
     <!-- Admin Auth -->
-    <div class="card">
+    <div class="card" id="login-card-section">
       <div class="card-header">
         <div>
           <div class="card-title">Authentication</div>
@@ -554,7 +556,7 @@
     </div>
 
     <!-- MetaMask Connection Card -->
-    <div class="card" style="margin-bottom: 32px; padding: 32px 40px; border-color: rgba(255, 255, 255, 0.1);">
+    <div class="card" id="wallet-card-section" style="margin-bottom: 32px; padding: 32px 40px; border-color: rgba(255, 255, 255, 0.1);">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px;">
         <div>
           <div class="card-title" style="font-size: 1.25rem;">Blockchain Identity Engine</div>
@@ -580,7 +582,7 @@
 
 
     <!-- Issue Section -->
-    <div id="issue-section">
+    <div id="issue-section" style="display: none;">
       <h2 class="section-title">Issue Credential</h2>
       
       <div id="type-selector" style="margin-bottom: 24px;"></div>
