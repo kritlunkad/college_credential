@@ -3,36 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="College Credential Issuer Portal — Issue verifiable academic credentials with cryptographic signatures.">
+  <meta name="description" content="College Credential Issuer Portal — Issue verifiable academic credentials with cryptographic ECDSA signatures and optional blockchain anchoring.">
   <title>College Portal — CredChain Issuer</title>
   <link rel="stylesheet" href="css/style.css?v=20260328-10">
 </head>
 <body>
 
-  <!-- Nav -->
-  <nav class="nav">
-    <div class="nav-inner">
-      <a href="index.html" class="nav-brand">
-        <div class="nav-brand-icon">⟐</div>
-        CredChain
-      </a>
-      <ul class="nav-links">
-        <li><a href="index.html" class="nav-link">Home</a></li>
-        <li><a href="college.html" class="nav-link active"><span class="nav-role-badge issuer">Issuer</span> College</a></li>
-        <li><a href="wallet.html" class="nav-link"><span class="nav-role-badge holder">Holder</span> Wallet</a></li>
-        <li><a href="verifier.html" class="nav-link"><span class="nav-role-badge verifier">Verifier</span> Verify</a></li>
-      </ul>
+  <!-- ═══ Header ═══ -->
+  <header class="app-header">
+    <div class="app-brand">
+      <div class="app-brand-icon">⟐</div>
+      <div>
+        <div class="app-brand-name">CredChain</div>
+        <div class="app-brand-sub">Issuer Portal</div>
+      </div>
+    </div>
+    <div class="app-header-right">
+      <a href="index.html" class="back-link">← Back to Home</a>
+      <div class="network-badge">
+        <span class="dot"></span>
+        Issuer Active
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ Tab Navigation ═══ -->
+  <nav class="tab-nav">
+    <div class="tab-bar">
+      <button class="tab-item active" onclick="showTab('issue')">Issue Credential</button>
+      <button class="tab-item" onclick="showTab('dashboard')">Dashboard</button>
+      <button class="tab-item" onclick="showTab('audit')">Audit Log</button>
     </div>
   </nav>
 
-  <div class="page">
+  <!-- ═══ Main Content ═══ -->
+  <main class="app-container">
+
     <!-- Demo Banner -->
     <div class="demo-banner">
-      ⚠️ Demo mode — Private key is ephemeral (sessionStorage) and scoped to this browser tab. Refreshing will generate a new key pair.
+      ⚠️ Demo mode — Private key is ephemeral and scoped to this browser tab
     </div>
 
-    <!-- Header -->
-    <div class="page-header">
+    <!-- Page Header -->
+    <div style="margin-bottom: 32px;">
       <h1 class="page-title">
         🏫 <span class="gradient-text">College Issuer</span> Portal
       </h1>
@@ -55,19 +68,25 @@
     </div>
 
     <!-- Key Status -->
-    <div id="key-status" class="status-indicator" style="margin-bottom: var(--space-lg);">
+    <div id="key-status" class="status-indicator" style="margin-bottom: 24px;">
       <span class="dot"></span>
       <span id="key-status-text">Initializing key pair...</span>
     </div>
 
     <!-- Issuer Wallet -->
-    <div class="card" style="margin-bottom: var(--space-lg);">
-      <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: var(--space-md);">Issuer MetaMask Wallet</h3>
-      <div style="display:flex; gap: var(--space-sm); align-items:center; flex-wrap: wrap;">
-        <button class="btn btn-primary btn-sm" id="btn-connect-issuer-wallet">🦊 Connect Issuer Wallet</button>
-        <span id="issuer-wallet-status" style="font-size:0.8rem; color:var(--text-secondary);">Not connected</span>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Issuer MetaMask Wallet</div>
+          <div class="card-subtitle">Connect your wallet to anchor credentials on-chain</div>
+        </div>
+        <div class="card-tag purple">Blockchain</div>
       </div>
-      <div id="issuer-wallet-address" style="font-size:0.72rem; color:var(--text-muted); margin-top: var(--space-sm); word-break: break-all;">—</div>
+      <div style="display:flex; gap: 8px; align-items:center; flex-wrap: wrap;">
+        <button class="btn btn-secondary btn-sm" id="btn-connect-issuer-wallet">🦊 Connect Issuer Wallet</button>
+        <span id="issuer-wallet-status" style="font-size:12px; color:var(--text-secondary);">Not connected</span>
+      </div>
+      <div id="issuer-wallet-address" style="font-size:11px; color:var(--text-muted); margin-top: 8px; word-break: break-all; font-family: 'SF Mono', 'Fira Code', monospace;">—</div>
     </div>
 
     <!-- Stats -->
@@ -94,8 +113,14 @@
       <div class="type-selector" id="type-selector"></div>
 
       <!-- Issuer Identity -->
-      <div class="card" style="margin-bottom: var(--space-lg);">
-        <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: var(--space-md);">Issuer Identity</h3>
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Issuer Identity</div>
+            <div class="card-subtitle">University details embedded in every credential</div>
+          </div>
+          <div class="card-tag green">Active</div>
+        </div>
         <div class="form-grid">
           <div class="form-group">
             <label class="form-label">Institution Name</label>
@@ -103,7 +128,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">Issuer DID</label>
-            <input type="text" class="form-input" id="issuer-did" value="did:web:shivnadar.university" readonly style="opacity:0.7;">
+            <input type="text" class="form-input" id="issuer-did" value="did:web:shivnadar.university" readonly style="opacity:0.6;">
           </div>
           <div class="form-group">
             <label class="form-label">Credential Validity (days)</label>
@@ -136,10 +161,15 @@
       </div>
 
       <!-- Dynamic Form -->
-      <div class="card" id="credential-form-card">
-        <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: var(--space-md);" id="form-title">Select a credential type above</h3>
+      <div class="card active-card" id="credential-form-card">
+        <div class="card-header">
+          <div>
+            <div class="card-title" id="form-title">Select a credential type above</div>
+            <div class="card-subtitle">Fill in student details to generate a signed credential</div>
+          </div>
+        </div>
         <div class="form-grid" id="credential-form"></div>
-        <div style="margin-top: var(--space-lg); display: flex; gap: var(--space-sm);">
+        <div style="margin-top: 24px; display: flex; gap: 8px;">
           <button class="btn btn-primary" id="btn-issue" disabled>🔏 Sign & Issue Credential</button>
           <button class="btn btn-ghost" id="btn-fill-sample">📝 Fill Sample Data</button>
         </div>
@@ -167,19 +197,27 @@
           </thead>
           <tbody id="audit-body"></tbody>
         </table>
-        <div id="audit-empty" class="empty-state" style="padding: var(--space-xl);">
+        <div id="audit-empty" class="empty-state" style="padding: 40px;">
           <div class="empty-state-icon">📋</div>
           <div class="empty-state-title">No events yet</div>
         </div>
-        <div style="margin-top: var(--space-md); text-align: right;">
+        <div style="margin-top: 16px; text-align: right;">
           <button class="btn btn-ghost btn-sm" id="btn-export-log">📥 Export Log</button>
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
   <!-- Toast Container -->
   <div class="toast-container" id="toast-container"></div>
+
+  <!-- Tab Switching Script -->
+  <script>
+    function showTab(tab) {
+      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+  </script>
 
   <!-- Scripts (order matters: state → crypto → store → data → college) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.1/dist/ethers.umd.min.js"></script>

@@ -3,30 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Student Credential Wallet — Claim, hold, and selectively share your verifiable academic credentials.">
+  <meta name="description" content="Student Credential Wallet — Claim, hold, and selectively share your verifiable academic credentials with zero-knowledge proofs.">
   <title>Student Wallet — CredChain Holder</title>
   <link rel="stylesheet" href="css/style.css?v=20260328-10">
 </head>
 <body>
 
-  <!-- Nav -->
-  <nav class="nav">
-    <div class="nav-inner">
-      <a href="index.html" class="nav-brand">
-        <div class="nav-brand-icon">⟐</div>
-        CredChain
-      </a>
-      <ul class="nav-links">
-        <li><a href="index.html" class="nav-link">Home</a></li>
-        <li><a href="college.html" class="nav-link"><span class="nav-role-badge issuer">Issuer</span> College</a></li>
-        <li><a href="wallet.html" class="nav-link active"><span class="nav-role-badge holder">Holder</span> Wallet</a></li>
-        <li><a href="verifier.html" class="nav-link"><span class="nav-role-badge verifier">Verifier</span> Verify</a></li>
-      </ul>
+  <!-- ═══ Header ═══ -->
+  <header class="app-header">
+    <div class="app-brand">
+      <div class="app-brand-icon">⟐</div>
+      <div>
+        <div class="app-brand-name">CredChain</div>
+        <div class="app-brand-sub">Student Wallet</div>
+      </div>
     </div>
-  </nav>
+    <div class="app-header-right">
+      <a href="index.html" class="back-link">← Back to Home</a>
+      <div class="network-badge">
+        <span class="dot"></span>
+        Holder Active
+      </div>
+    </div>
+  </header>
 
-  <div class="page">
-    <div class="page-header">
+  <!-- ═══ Step Progress Track ═══ -->
+  <div class="step-track">
+    <div class="step-circle done">✓</div>
+    <div class="step-connector done"></div>
+    <div class="step-circle active">2</div>
+    <div class="step-connector"></div>
+    <div class="step-circle">3</div>
+    <div class="step-connector"></div>
+    <div class="step-circle">4</div>
+  </div>
+
+  <!-- ═══ Main Content ═══ -->
+  <main class="app-container">
+
+    <!-- Page Header -->
+    <div style="margin-bottom: 32px;">
       <h1 class="page-title">
         👛 <span class="gradient-text">Student Wallet</span>
       </h1>
@@ -45,22 +61,32 @@
     </div>
 
     <!-- Holder Wallet -->
-    <div class="card" style="margin-bottom: var(--space-lg);">
-      <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: var(--space-md);">Student MetaMask Wallet</h3>
-      <div style="display:flex; gap: var(--space-sm); align-items:center; flex-wrap: wrap;">
-        <button class="btn btn-primary btn-sm" id="btn-connect-holder-wallet">🦊 Connect Student Wallet</button>
-        <span id="holder-wallet-status" style="font-size:0.8rem; color:var(--text-secondary);">Not connected</span>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Student MetaMask Wallet</div>
+          <div class="card-subtitle">Connect to anchor presentations on-chain</div>
+        </div>
+        <div class="card-tag purple">Blockchain</div>
       </div>
-      <div id="holder-wallet-address" style="font-size:0.72rem; color:var(--text-muted); margin-top: var(--space-sm); word-break: break-all;">—</div>
+      <div style="display:flex; gap: 8px; align-items:center; flex-wrap: wrap;">
+        <button class="btn btn-secondary btn-sm" id="btn-connect-holder-wallet">🦊 Connect Student Wallet</button>
+        <span id="holder-wallet-status" style="font-size:12px; color:var(--text-secondary);">Not connected</span>
+      </div>
+      <div id="holder-wallet-address" style="font-size:11px; color:var(--text-muted); margin-top: 8px; word-break: break-all; font-family: 'SF Mono', 'Fira Code', monospace;">—</div>
     </div>
 
     <!-- Claim Credentials -->
     <div class="section">
       <h2 class="section-title">Claim your credentials</h2>
-      <div class="card">
-        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: var(--space-md);">
-          Enter your enrollment ID to claim credentials issued by your college.
-        </p>
+      <div class="card active-card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Claim Credentials</div>
+            <div class="card-subtitle">Enter your enrollment ID to claim credentials issued by your college</div>
+          </div>
+          <div class="card-tag green">Step 1</div>
+        </div>
         <div class="claim-bar">
           <input type="text" class="form-input" id="claim-enrollment-id" placeholder="e.g. SNU2024001">
           <button class="btn btn-primary" id="btn-claim">🔑 Claim</button>
@@ -80,7 +106,7 @@
       <div id="wallet-empty" class="empty-state">
         <div class="empty-state-icon">👛</div>
         <div class="empty-state-title">No credentials in your wallet</div>
-        <p style="color: var(--text-muted); font-size: 0.85rem;">Claim credentials above using your enrollment ID.</p>
+        <p style="color: var(--text-muted); font-size: 13px;">Claim credentials above using your enrollment ID.</p>
       </div>
     </div>
 
@@ -88,13 +114,13 @@
     <div class="section">
       <h2 class="section-title">Shared presentations</h2>
       <div id="presentations-list"></div>
-      <div id="presentations-empty" class="empty-state" style="padding: var(--space-xl);">
+      <div id="presentations-empty" class="empty-state" style="padding: 40px;">
         <div class="empty-state-icon">📤</div>
         <div class="empty-state-title">No presentations yet</div>
-        <p style="color: var(--text-muted); font-size: 0.85rem;">Share a credential to generate a verifiable presentation.</p>
+        <p style="color: var(--text-muted); font-size: 13px;">Share a credential to generate a verifiable presentation.</p>
       </div>
     </div>
-  </div>
+  </main>
 
   <!-- Share Modal -->
   <div class="modal-overlay" id="share-modal">

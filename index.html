@@ -1,167 +1,455 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Decentralized college credential verification system with cryptographic proofs and selective disclosure. Issue, hold, and verify academic credentials.">
-  <title>CredChain — Decentralized College Credentials</title>
-  <link rel="stylesheet" href="css/style.css">
+  <meta name="description"
+    content="CredChain — Decentralized college credential verification with cryptographic proofs, zero-knowledge range proofs, and selective disclosure. Issue, hold, and verify academic credentials trustlessly.">
+  <title>CredChain — Verifiable College Credentials</title>
+  <link rel="stylesheet" href="landing.css">
+
+  <style>
+    /* ── Splash Screen ───────────────────────────────────────── */
+    .splash {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #050505;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .splash.fade-out {
+      opacity: 0;
+      transform: scale(1.05);
+      pointer-events: none;
+    }
+
+    .splash video {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      transform: translate(-50%, -50%);
+      object-fit: cover;
+    }
+
+    /* ── Main site hidden during splash ──────────────────────── */
+    .site-wrap {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s,
+        transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s;
+    }
+
+    .site-wrap.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
 </head>
+
 <body>
 
-  <!-- Nav -->
-  <nav class="nav">
-    <div class="nav-inner">
-      <a href="index.html" class="nav-brand">
-        <div class="nav-brand-icon">⟐</div>
-        CredChain
-      </a>
-      <ul class="nav-links">
-        <li><a href="index.html" class="nav-link active">Home</a></li>
-        <li><a href="college.html" class="nav-link"><span class="nav-role-badge issuer">Issuer</span> College</a></li>
-        <li><a href="wallet.html" class="nav-link"><span class="nav-role-badge holder">Holder</span> Wallet</a></li>
-        <li><a href="verifier.html" class="nav-link"><span class="nav-role-badge verifier">Verifier</span> Verify</a></li>
-      </ul>
-    </div>
-  </nav>
+  <!-- ════════════════════════════════════════════════════════════
+       SPLASH SCREEN — Video plays once, then fades to site
+       ════════════════════════════════════════════════════════════ -->
+  <div class="splash" id="splash">
+    <video autoplay muted playsinline id="splash-video">
+      <source src="assets/Minimal_Logo_Animation_Generation.mp4" type="video/mp4">
+    </video>
+  </div>
 
-  <!-- Hero -->
-  <section class="hero">
-    <h1 class="hero-title">
-      <span class="gradient-text">Stronger verification,</span><br>
-      less fraud
-    </h1>
-    <p class="hero-subtitle">
-      Stop forged transcripts, fake degrees, and impersonation with secure, cryptographic credentials.
-      Built on the W3C Verifiable Credentials trust triangle — students own their data, colleges sign it,
-      and anyone can verify it instantly.
-    </p>
-    <div class="hero-cta">
-      <a href="college.html" class="btn btn-primary btn-lg">🏫 Issue Credentials</a>
-      <a href="wallet.html" class="btn btn-success btn-lg">👛 Open Wallet</a>
-      <a href="verifier.html" class="btn btn-ghost btn-lg">🔍 Verify a Student</a>
+  <!-- ════════════════════════════════════════════════════════════
+       MAIN SITE (hidden until splash ends)
+       ════════════════════════════════════════════════════════════ -->
+  <div class="site-wrap" id="site-wrap">
+
+    <!-- ── Navigation ──────────────────────────────────────────── -->
+    <nav class="nav" id="nav">
+      <div class="nav-inner">
+        <a href="index.html" class="nav-brand">
+          <img src="assets/trustlessid logo.png" alt="TrustlessID Logo" style="height: 26px; width: auto; object-fit: contain;">
+          CredChain
+        </a>
+        <ul class="nav-links">
+          <li><a href="#features" class="nav-link">Features</a></li>
+          <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
+          <li><a href="college.html" class="nav-link">Issuer Portal</a></li>
+        </ul>
+        <a href="college.html" class="nav-cta">Launch App →</a>
+      </div>
+    </nav>
+
+    <!-- ── Hero ────────────────────────────────────────────────── -->
+    <section class="hero">
+      <h1 class="hero-title">
+        Stronger verification,<br>
+        <span class="gradient-text">less fraud.</span>
+      </h1>
+      <p class="hero-subtitle">
+        Stop forged transcripts and fake degrees with cryptographic credentials. Students own their data, colleges sign
+        it, and anyone can verify it — instantly.
+      </p>
+      <div class="hero-buttons">
+        <a href="college.html" class="btn-hero-primary">Issue Credentials →</a>
+        <a href="wallet.html" class="btn-hero-secondary">Open Your Wallet</a>
+      </div>
+  </div>
+  </section>
+
+  <!-- ── Feature 1 — Selective Disclosure ─────────────────────── -->
+  <div id="features">
+    <section class="feature-section reveal">
+      <div class="feature-text">
+        <h2>Share only what<br>you choose.</h2>
+        <div class="feature-divider"></div>
+        <p>Students control exactly which fields to reveal. Show your major without exposing your GPA, or prove
+          enrollment without sharing personal details.</p>
+        <p>Toggle switches let you selectively disclose each field — your data stays yours, shared on your terms.</p>
+      </div>
+      <div class="feature-visual">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="phone-screen-header">My Credential</div>
+            <div class="phone-credential-card">
+              <div class="phone-credential-title">Academic Transcript</div>
+              <div class="phone-credential-sub">Shiv Nadar University</div>
+              <div class="phone-toggle-row">
+                <span class="phone-toggle-label">Full Name</span>
+                <div class="phone-toggle on" data-toggle="0"></div>
+              </div>
+              <div class="phone-toggle-row">
+                <span class="phone-toggle-label">Enrollment ID</span>
+                <div class="phone-toggle on" data-toggle="1"></div>
+              </div>
+              <div class="phone-toggle-row">
+                <span class="phone-toggle-label">Major / Branch</span>
+                <div class="phone-toggle" data-toggle="2"></div>
+              </div>
+              <div class="phone-toggle-row">
+                <span class="phone-toggle-label">GPA Score</span>
+                <div class="phone-toggle" data-toggle="3"></div>
+              </div>
+              <div class="phone-toggle-row">
+                <span class="phone-toggle-label">Graduation Year</span>
+                <div class="phone-toggle on" data-toggle="4"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Feature 2 — Cryptographic Trust ───────────────────── -->
+    <section class="feature-section reveal">
+      <div class="feature-text">
+        <h2>Cryptographic trust,<br>zero databases.</h2>
+        <div class="feature-divider"></div>
+        <p>Every credential is sealed with ECDSA P-256 digital signatures via the Web Crypto API. Tamper-proof by design
+          — no central database needed.</p>
+        <p>Verifiers trust the math, not a middleman. Replay detection, expiry checks, and revocation are baked into
+          every verification flow.</p>
+      </div>
+      <div class="feature-visual">
+        <div class="stacked-cards">
+          <div class="stack-card">
+            <div class="stack-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg></div>
+            <div class="stack-card-text">
+              <div class="stack-card-title">ECDSA P-256 Signatures</div>
+              <div class="stack-card-desc">Mathematically bound to the issuer</div>
+            </div>
+          </div>
+          <div class="stack-card">
+            <div class="stack-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg></div>
+            <div class="stack-card-text">
+              <div class="stack-card-title">Tamper Detection</div>
+              <div class="stack-card-desc">Any modification invalidates the proof</div>
+            </div>
+          </div>
+          <div class="stack-card">
+            <div class="stack-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg></div>
+            <div class="stack-card-text">
+              <div class="stack-card-title">Expiry & Revocation</div>
+              <div class="stack-card-desc">Time-bound credentials with revocation support</div>
+            </div>
+          </div>
+          <div class="stack-card">
+            <div class="stack-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+              </svg></div>
+            <div class="stack-card-text">
+              <div class="stack-card-title">Replay Protection</div>
+              <div class="stack-card-desc">Each presentation is unique & single-use</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Feature 3 — Zero-Knowledge Proofs ─────────────────── -->
+    <section class="feature-section reveal">
+      <div class="feature-text">
+        <h2>Prove claims<br>without revealing data.</h2>
+        <div class="feature-divider"></div>
+        <p>Zero-knowledge range proofs let students prove claims like "GPA > 8.0" without revealing the exact value.
+          SHA-256 commitments bind the claim to the signed credential.</p>
+        <p>Built with snarkjs and Circom circuits — the same cryptography powering Ethereum's privacy layer.</p>
+      </div>
+      <div class="feature-visual">
+        <div class="service-list">
+          <div class="service-list-badge">
+            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"
+                style="display:inline-block; vertical-align:middle; margin-right:4px; margin-top:-2px;">
+                <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                <rect x="9" y="9" width="6" height="6"></rect>
+                <line x1="9" y1="1" x2="9" y2="4"></line>
+                <line x1="15" y1="1" x2="15" y2="4"></line>
+                <line x1="9" y1="20" x2="9" y2="23"></line>
+                <line x1="15" y1="20" x2="15" y2="23"></line>
+                <line x1="20" y1="9" x2="23" y2="9"></line>
+                <line x1="20" y1="14" x2="23" y2="14"></line>
+                <line x1="1" y1="9" x2="4" y2="9"></line>
+                <line x1="1" y1="14" x2="4" y2="14"></line>
+              </svg></span> ZKP Capabilities
+          </div>
+          <div class="service-row">
+            <div class="service-row-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+              </svg></div>
+            <div class="service-row-text">
+              <div class="service-row-title">GPA Range Proofs</div>
+              <div class="service-row-desc">Prove GPA ≥ threshold without revealing exact score</div>
+            </div>
+            <span class="service-row-arrow">→</span>
+          </div>
+          <div class="service-row">
+            <div class="service-row-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="8" r="7"></circle>
+                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+              </svg></div>
+            <div class="service-row-text">
+              <div class="service-row-title">Enrollment Verification</div>
+              <div class="service-row-desc">Confirm active enrollment status privately</div>
+            </div>
+            <span class="service-row-arrow">→</span>
+          </div>
+          <div class="service-row">
+            <div class="service-row-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                <line x1="12" y1="18" x2="12.01" y2="18"></line>
+              </svg></div>
+            <div class="service-row-text">
+              <div class="service-row-title">QR Code Sharing</div>
+              <div class="service-row-desc">Scan & verify credentials in-person instantly</div>
+            </div>
+            <span class="service-row-arrow">→</span>
+          </div>
+          <div class="service-row">
+            <div class="service-row-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              </svg></div>
+            <div class="service-row-text">
+              <div class="service-row-title">Blockchain Anchoring</div>
+              <div class="service-row-desc">Optional on-chain hash for immutable audit trail</div>
+            </div>
+            <span class="service-row-arrow">→</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ── How It Works ──────────────────────────────────────── -->
+  <section class="how-it-works reveal" id="how-it-works">
+    <h2 class="section-heading">How it works</h2>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-watermark">01</div>
+        <div class="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg></div>
+        <h3 class="step-title">College Issues</h3>
+        <p class="step-desc">The university digitally signs academic credentials with their ECDSA private key. The
+          public key is embedded for self-contained verification.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-watermark">02</div>
+        <div class="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+            <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+            <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+          </svg></div>
+        <h3 class="step-title">Student Claims</h3>
+        <p class="step-desc">Credentials live in the student's wallet — not in a central database. Students claim using
+          their enrollment ID and connect their wallet.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-watermark">03</div>
+        <div class="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="21" x2="4" y2="14"></line>
+            <line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line>
+            <line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="1" y1="14" x2="7" y2="14"></line>
+            <line x1="9" y1="8" x2="15" y2="8"></line>
+            <line x1="17" y1="16" x2="23" y2="16"></line>
+          </svg></div>
+        <h3 class="step-title">Selectively Share</h3>
+        <p class="step-desc">Toggle switches control which fields to reveal. Generate a verifiable presentation with
+          optional ZKP range proofs for sensitive values.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-watermark">04</div>
+        <div class="step-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg></div>
+        <h3 class="step-title">Anyone Verifies</h3>
+        <p class="step-desc">Employers or scholarship boards enter a code or scan QR. The system checks the digital
+          signature and validates ZKP proofs — instant, mathematical trust.</p>
+      </div>
     </div>
   </section>
 
-  <!-- How It Works -->
-  <div class="page">
-    <div class="section">
-      <h2 class="section-title">How it works</h2>
-      <div class="flow-steps">
-        <div class="flow-step card">
-          <div class="flow-step-number">1</div>
-          <h3 class="flow-step-title">College Issues</h3>
-          <p class="flow-step-desc">
-            The university digitally signs academic credentials (transcripts, identity, achievements) with their
-            private key. The public key is embedded in the credential for self-contained verification.
-          </p>
-        </div>
-        <div class="flow-step card">
-          <div class="flow-step-number">2</div>
-          <h3 class="flow-step-title">Student Holds</h3>
-          <p class="flow-step-desc">
-            Credentials live in the student's wallet — not in a central database. Students control what they
-            share using toggle switches, and can prove claims (like GPA&nbsp;>&nbsp;8.0) without revealing exact values.
-          </p>
-        </div>
-        <div class="flow-step card">
-          <div class="flow-step-number">3</div>
-          <h3 class="flow-step-title">Third Party Verifies</h3>
-          <p class="flow-step-desc">
-            Employers, scholarship boards, or any verifier enters a code or scans a QR. The system checks the
-            issuer's digital signature and validates any ZKP range proofs — instant, mathematical trust.
-          </p>
-        </div>
+  <!-- ── CTA Banner ──────────────────────────────────────────── -->
+  <section class="cta-banner reveal">
+    <h2 class="cta-heading">Ready to go trustless?</h2>
+    <p class="cta-subtitle">Issue your first verifiable credential in under a minute. No signups, no databases — just
+      cryptography.</p>
+    <a href="college.html" class="btn-cta">Launch CredChain →</a>
+  </section>
+
+  <!-- ── Footer ──────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-copy">© 2026 CredChain — Built with W3C Verifiable Credentials</span>
+      <div class="footer-links">
+        <a href="college.html">Issuer Portal</a>
+        <a href="wallet.html">Student Wallet</a>
+        <a href="verifier.html">Verifier</a>
+        <a href="https://www.w3.org/TR/vc-data-model/" target="_blank">W3C VC Spec</a>
       </div>
     </div>
-
-    <!-- Features -->
-    <div class="section">
-      <h2 class="section-title">Built for trust</h2>
-      <div class="features-grid">
-        <div class="feature-card card">
-          <div class="feature-icon">🔐</div>
-          <h3 class="feature-title">Cryptographic Signatures</h3>
-          <p class="feature-desc">
-            ECDSA P-256 digital signatures via Web Crypto API. Every credential is mathematically bound
-            to the issuing institution — tamper-proof by design.
-          </p>
-        </div>
-        <div class="feature-card card">
-          <div class="feature-icon">🎛️</div>
-          <h3 class="feature-title">Selective Disclosure</h3>
-          <p class="feature-desc">
-            Students choose exactly which fields to share. Show your major without revealing your GPA,
-            or prove enrollment without exposing personal details.
-          </p>
-        </div>
-        <div class="feature-card card">
-          <div class="feature-icon">🧮</div>
-          <h3 class="feature-title">Zero-Knowledge Proofs</h3>
-          <p class="feature-desc">
-            Prove your GPA is above a threshold without revealing the exact number. SHA-256 commitment
-            binds the range claim to the signed credential.
-          </p>
-        </div>
-        <div class="feature-card card">
-          <div class="feature-icon">📱</div>
-          <h3 class="feature-title">QR Code Sharing</h3>
-          <p class="feature-desc">
-            Generate a QR code for any verifiable presentation. Verifiers scan and get instant results — 
-            perfect for in-person verification.
-          </p>
-        </div>
-        <div class="feature-card card">
-          <div class="feature-icon">⏱️</div>
-          <h3 class="feature-title">Expiry & Revocation</h3>
-          <p class="feature-desc">
-            Credentials expire naturally, and issuers can revoke them. The verifier checks both before
-            accepting any proof.
-          </p>
-        </div>
-        <div class="feature-card card">
-          <div class="feature-icon">🏛️</div>
-          <h3 class="feature-title">Multi-Issuer Trust</h3>
-          <p class="feature-desc">
-            Support credentials from multiple institutions. Each issuer registers their own key pair — 
-            verifiers trust the cryptography, not a single database.
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Trust Triangle Diagram -->
-    <div class="section" style="text-align:center; padding: var(--space-2xl) 0;">
-      <h2 class="section-title">The trust triangle</h2>
-      <div class="card" style="display:inline-block; padding: var(--space-2xl); max-width: 600px;">
-        <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 2;">
-          <div style="margin-bottom: var(--space-lg);">
-            <span style="font-size: 2rem;">🏫</span><br>
-            <strong style="color: var(--text-primary);">Issuer</strong> (College)<br>
-            Signs credentials with private key
-          </div>
-          <div style="display: flex; justify-content: space-between; max-width: 400px; margin: 0 auto;">
-            <div>
-              <span style="font-size: 2rem;">👛</span><br>
-              <strong style="color: var(--text-primary);">Holder</strong> (Student)<br>
-              Controls & selectively shares
-            </div>
-            <div>
-              <span style="font-size: 2rem;">🔍</span><br>
-              <strong style="color: var(--text-primary);">Verifier</strong> (Third Party)<br>
-              Checks signature & proofs
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <footer style="text-align:center; padding: var(--space-2xl); border-top: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.8rem;">
-    CredChain — Hackathon Demo · Built with W3C Verifiable Credentials concepts · 
-    <a href="https://www.w3.org/TR/vc-data-model/" target="_blank" style="color: var(--accent-indigo-light);">W3C VC Spec</a>
   </footer>
 
+  </div><!-- /site-wrap -->
+
+  <!-- ════════════════════════════════════════════════════════════
+       SCRIPTS
+       ════════════════════════════════════════════════════════════ -->
+  <script>
+    /* ── Splash → Main transition ────────────────────────────── */
+    const splash = document.getElementById('splash');
+    const splashVideo = document.getElementById('splash-video');
+    const siteWrap = document.getElementById('site-wrap');
+
+    function endSplash() {
+      splash.classList.add('fade-out');
+      siteWrap.classList.add('visible');
+      setTimeout(() => {
+        splash.style.display = 'none';
+        splashVideo.pause();
+        splashVideo.removeAttribute('src');
+        splashVideo.load();
+      }, 900);
+    }
+
+    /* End splash when video finishes playing */
+    splashVideo.addEventListener('ended', endSplash);
+
+    /* Fallback: if video doesn't fire 'ended' (e.g. short loop), cap at 6s */
+    setTimeout(() => {
+      if (!splash.classList.contains('fade-out')) {
+        endSplash();
+      }
+    }, 6000);
+
+    /* Allow skip on click */
+    splash.addEventListener('click', endSplash);
+
+    /* ── Navbar scroll effect ────────────────────────────────── */
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    /* ── Smooth scroll for anchor links ──────────────────────── */
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    /* ── Scroll reveal with IntersectionObserver ──────────────── */
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach(el => {
+      revealObserver.observe(el);
+    });
+
+    /* ── Toggle switch animation (cycle every 2s) ────────────── */
+    const toggles = document.querySelectorAll('.phone-toggle');
+    let toggleIndex = 0;
+
+    function cycleToggle() {
+      const toggle = toggles[toggleIndex];
+      if (toggle) {
+        toggle.classList.toggle('on');
+      }
+      toggleIndex = (toggleIndex + 1) % toggles.length;
+    }
+
+    setInterval(cycleToggle, 2000);
+  </script>
+
 </body>
+
 </html>
