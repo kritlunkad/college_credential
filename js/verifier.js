@@ -65,6 +65,7 @@
       const cred = presentation.credential;
       const checks = [];
       let overallStatus = 'success';
+      const zkpProofs = { ...(cred.zkpProofs || {}) };
 
       // ── Check 1: Replay Detection ─────────────────────────────────
       if (presentation.usedAt) {
@@ -157,15 +158,16 @@
       }
 
       // ── Check 5: Issuer Trust ─────────────────────────────────────
-      const registeredKey = Store.getPublicKey(cred.issuer.name);
+      const issuerName = cred.issuer.name.trim();
+      const registeredKey = Store.getPublicKey(issuerName);
       if (registeredKey) {
         const keysMatch = JSON.stringify(cred.issuerPublicKey) === JSON.stringify(registeredKey);
         checks.push({
           label: 'Issuer Trust',
           status: keysMatch ? 'pass' : 'warning',
           detail: keysMatch
-            ? `Issuer "${cred.issuer.name}" is in the trusted registry with a matching public key`
-            : `⚠️ Issuer key does not match the registered key for "${cred.issuer.name}"`,
+            ? `Issuer "${issuerName}" is in the trusted registry with a matching public key`
+            : `⚠️ Issuer key does not match the registered key for "${issuerName}"`,
         });
         if (!keysMatch && overallStatus === 'success') overallStatus = 'warning';
       } else {
@@ -178,7 +180,6 @@
       }
 
       // ── Check 6: REAL Groth16 ZKP Proof Verification ──────────────
-      const zkpProofs = cred.zkpProofs || {};
       for (const [field, proofData] of Object.entries(zkpProofs)) {
         if (proofData.type === 'Groth16' && proofData.proof && proofData.publicSignals) {
           try {
@@ -206,12 +207,14 @@
             );
 
             console.log('[ZKP Verify] Result:', isValid);
+            proofData.result = isValid;
 
             if (isValid) {
               // Verify the public signal matches the claimed threshold
-              const publicThreshold = parseInt(proofData.publicSignals[0]);
+              const publicThreshold = parseInt(proofData.publicSignals[0], 10);
               const claimedThreshold = proofData.scaledThreshold;
-              const thresholdMatch = publicThreshold === claimedThreshold;
+              const thresholdMatch = Number.isFinite(publicThreshold) && publicThreshold === claimedThreshold;
+              proofData.thresholdMatch = thresholdMatch;
 
               checks.push({
                 label: `ZKP Groth16: ${proofData.claim}`,
@@ -220,6 +223,7 @@
                   ? `🧮 ✅ Groth16 proof VERIFIED — "${proofData.claim}" is mathematically proven TRUE. Protocol: groth16 on bn128. Public threshold: ${publicThreshold / 10}. Actual value NOT revealed.`
                   : `🧮 ⚠️ Groth16 proof valid but threshold mismatch: public=${publicThreshold}, claimed=${claimedThreshold}`,
               });
+              if (!thresholdMatch && overallStatus === 'success') overallStatus = 'warning';
             } else {
               checks.push({
                 label: `ZKP Groth16: ${proofData.claim}`,
@@ -239,6 +243,7 @@
           }
         } else {
           // Legacy/fallback for non-Groth16 proofs
+          proofData.result = !!proofData.result;
           checks.push({
             label: `ZKP: ${proofData.claim}`,
             status: proofData.result ? 'pass' : 'fail',

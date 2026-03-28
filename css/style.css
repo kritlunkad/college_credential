@@ -276,6 +276,13 @@ body {
   inset: 0;
   opacity: 0.08;
   transition: opacity var(--transition-base);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.credential-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .credential-card:hover {
@@ -348,6 +355,13 @@ body {
   margin-top: var(--space-lg);
   padding-top: var(--space-md);
   border-top: 1px solid var(--border-subtle);
+  position: relative;
+  z-index: 2;
+}
+
+.credential-card-actions .btn {
+  position: relative;
+  z-index: 3;
 }
 
 /* ── Badges ─────────────────────────────────────────────────── */

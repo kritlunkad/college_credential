@@ -117,15 +117,21 @@
       actionsDiv.className = 'credential-card-actions';
 
       const detailBtn = document.createElement('button');
+      detailBtn.type = 'button';
       detailBtn.className = 'btn btn-ghost btn-sm';
       detailBtn.textContent = '👁️ Details';
+      detailBtn.dataset.action = 'details';
+      detailBtn.dataset.credId = cred.id;
       detailBtn.addEventListener('click', () => openDetailModal(cred.id));
       actionsDiv.appendChild(detailBtn);
 
       if (!isRevoked && expiry.status !== 'expired') {
         const shareBtn = document.createElement('button');
+        shareBtn.type = 'button';
         shareBtn.className = 'btn btn-success btn-sm';
         shareBtn.textContent = '📤 Share';
+        shareBtn.dataset.action = 'share';
+        shareBtn.dataset.credId = cred.id;
         shareBtn.addEventListener('click', () => openShareModal(cred.id));
         actionsDiv.appendChild(shareBtn);
       } else {
@@ -162,66 +168,72 @@
 
   // ── Detail Modal ────────────────────────────────────────────────
   function openDetailModal(credId) {
-    const cred = Store.getCredentialById(credId);
-    if (!cred) return;
+    try {
+      const cred = Store.getCredentialById(credId);
+      if (!cred) return;
 
-    const typeInfo = getCredentialTypeInfo(cred.type[1]) || { label: 'Credential' };
-    const type = Object.values(CredentialTypes).find(t => t.key === cred.type[1]);
+      const typeInfo = getCredentialTypeInfo(cred.type[1]) || { label: 'Credential' };
+      const type = Object.values(CredentialTypes).find(t => t.key === cred.type[1]);
 
-    document.getElementById('detail-modal-title').textContent = typeInfo.label + ' — Details';
-    const body = document.getElementById('detail-modal-body');
+      document.getElementById('detail-modal-title').textContent = typeInfo.label + ' — Details';
+      const body = document.getElementById('detail-modal-body');
 
-    let fieldsHtml = '';
-    if (type) {
-      fieldsHtml = type.fields.map(f => {
-        let value = cred.credentialSubject[f.key];
-        if (Array.isArray(value)) value = value.join(', ');
-        if (value === undefined) return '';
-        return `
+      let fieldsHtml = '';
+      if (type) {
+        fieldsHtml = type.fields.map(f => {
+          let value = cred.credentialSubject[f.key];
+          if (Array.isArray(value)) value = value.join(', ');
+          if (value === undefined) return '';
+          return `
+            <div class="credential-field" style="margin-bottom: var(--space-sm);">
+              <span class="credential-field-label">${f.label} ${f.sensitive ? '<span class="toggle-sensitive">sensitive</span>' : ''}</span>
+              <span class="credential-field-value">${value}</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const signature = typeof cred.proof?.signature === 'string' ? cred.proof.signature : 'Unavailable';
+      body.innerHTML = `
+        <div style="margin-bottom: var(--space-md);">
           <div class="credential-field" style="margin-bottom: var(--space-sm);">
-            <span class="credential-field-label">${f.label} ${f.sensitive ? '<span class="toggle-sensitive">sensitive</span>' : ''}</span>
-            <span class="credential-field-value">${value}</span>
+            <span class="credential-field-label">Credential ID</span>
+            <span class="credential-field-value" style="font-size:0.75rem; word-break:break-all;">${cred.id}</span>
           </div>
-        `;
-      }).join('');
+          <div class="credential-field" style="margin-bottom: var(--space-sm);">
+            <span class="credential-field-label">Issuer</span>
+            <span class="credential-field-value">${cred.issuer.name} (${cred.issuer.id})</span>
+          </div>
+          <div class="credential-field" style="margin-bottom: var(--space-sm);">
+            <span class="credential-field-label">Issued</span>
+            <span class="credential-field-value">${new Date(cred.issuanceDate).toLocaleString()}</span>
+          </div>
+          <div class="credential-field" style="margin-bottom: var(--space-sm);">
+            <span class="credential-field-label">Expires</span>
+            <span class="credential-field-value">${new Date(cred.expirationDate).toLocaleString()}</span>
+          </div>
+        </div>
+        <hr style="border-color: var(--border-subtle); margin: var(--space-md) 0;">
+        <h4 style="font-size: 0.85rem; font-weight: 600; margin-bottom: var(--space-md);">Subject Data</h4>
+        ${fieldsHtml}
+        <hr style="border-color: var(--border-subtle); margin: var(--space-md) 0;">
+        <h4 style="font-size: 0.85rem; font-weight: 600; margin-bottom: var(--space-md);">Proof</h4>
+        <div class="credential-field">
+          <span class="credential-field-label">Signature (truncated)</span>
+          <span class="credential-field-value" style="font-size:0.7rem; word-break:break-all; color:var(--text-muted);">${signature.substring(0, 60)}${signature === 'Unavailable' ? '' : '…'}</span>
+        </div>
+      `;
+
+      document.getElementById('detail-modal-share').onclick = () => {
+        closeModal('detail-modal');
+        openShareModal(credId);
+      };
+
+      openModal('detail-modal');
+    } catch (e) {
+      console.error('[OpenDetailModal Error]', e);
+      showToast('Error opening details: ' + e.message, 'error');
     }
-
-    body.innerHTML = `
-      <div style="margin-bottom: var(--space-md);">
-        <div class="credential-field" style="margin-bottom: var(--space-sm);">
-          <span class="credential-field-label">Credential ID</span>
-          <span class="credential-field-value" style="font-size:0.75rem; word-break:break-all;">${cred.id}</span>
-        </div>
-        <div class="credential-field" style="margin-bottom: var(--space-sm);">
-          <span class="credential-field-label">Issuer</span>
-          <span class="credential-field-value">${cred.issuer.name} (${cred.issuer.id})</span>
-        </div>
-        <div class="credential-field" style="margin-bottom: var(--space-sm);">
-          <span class="credential-field-label">Issued</span>
-          <span class="credential-field-value">${new Date(cred.issuanceDate).toLocaleString()}</span>
-        </div>
-        <div class="credential-field" style="margin-bottom: var(--space-sm);">
-          <span class="credential-field-label">Expires</span>
-          <span class="credential-field-value">${new Date(cred.expirationDate).toLocaleString()}</span>
-        </div>
-      </div>
-      <hr style="border-color: var(--border-subtle); margin: var(--space-md) 0;">
-      <h4 style="font-size: 0.85rem; font-weight: 600; margin-bottom: var(--space-md);">Subject Data</h4>
-      ${fieldsHtml}
-      <hr style="border-color: var(--border-subtle); margin: var(--space-md) 0;">
-      <h4 style="font-size: 0.85rem; font-weight: 600; margin-bottom: var(--space-md);">Proof</h4>
-      <div class="credential-field">
-        <span class="credential-field-label">Signature (truncated)</span>
-        <span class="credential-field-value" style="font-size:0.7rem; word-break:break-all; color:var(--text-muted);">${cred.proof?.signature?.substring(0, 60)}…</span>
-      </div>
-    `;
-
-    document.getElementById('detail-modal-share').onclick = () => {
-      closeModal('detail-modal');
-      openShareModal(credId);
-    };
-
-    openModal('detail-modal');
   }
 
   // ── Share Modal (Selective Disclosure) ──────────────────────────
@@ -353,8 +365,15 @@
         if (toggle.checked) {
           const key = toggle.dataset.zkp;
           const thresholdInput = document.getElementById(`zkp-threshold-${key}`);
-          const threshold = parseInt(thresholdInput?.value || 80);
+          const threshold = parseInt(thresholdInput?.value || '80', 10);
           const actualValue = cred.credentialSubject[key];
+
+          if (!Number.isFinite(threshold) || threshold < 0 || threshold > 100) {
+            showToast(`Invalid threshold for ${key}. Use a value between 0 and 100.`, 'error');
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = '📤 Generate Presentation';
+            return;
+          }
           
           // Scale GPA: 8.7 → 87 (multiply by 10, round to int)
           const scaledGpa = Math.round(actualValue * 10);
@@ -603,6 +622,21 @@
     document.getElementById(id).addEventListener('click', e => {
       if (e.target === e.currentTarget) closeModal(id);
     });
+  });
+
+  // Delegated click handler as a fallback for dynamically rendered cards
+  document.getElementById('wallet-cards').addEventListener('click', (e) => {
+    const actionButton = e.target.closest('button[data-action][data-cred-id]');
+    if (!actionButton) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const credId = actionButton.dataset.credId;
+    if (actionButton.dataset.action === 'details') {
+      openDetailModal(credId);
+    } else if (actionButton.dataset.action === 'share') {
+      openShareModal(credId);
+    }
   });
 
   // Reactive updates

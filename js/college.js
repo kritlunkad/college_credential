@@ -34,7 +34,7 @@
       }
 
       // Register public key for the issuer
-      const issuerName = document.getElementById('issuer-name').value;
+      const issuerName = document.getElementById('issuer-name').value.trim();
       Store.savePublicKey(issuerName, publicKeyJwk);
 
       statusEl.classList.add('active');
@@ -176,8 +176,8 @@
       subjectData[field.key] = value;
     }
 
-    const issuerName = document.getElementById('issuer-name').value;
-    const issuerDid = document.getElementById('issuer-did').value;
+    const issuerName = document.getElementById('issuer-name').value.trim();
+    const issuerDid = document.getElementById('issuer-did').value.trim();
     const expiryDays = parseInt(document.getElementById('expiry-days').value) || 365;
 
     const issuer = { id: issuerDid, name: issuerName };
@@ -356,7 +356,7 @@
 
   // Re-register public key when issuer name changes
   document.getElementById('issuer-name').addEventListener('change', () => {
-    const name = document.getElementById('issuer-name').value;
+    const name = document.getElementById('issuer-name').value.trim();
     if (publicKeyJwk) {
       Store.savePublicKey(name, publicKeyJwk);
     }
