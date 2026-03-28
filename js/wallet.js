@@ -242,45 +242,90 @@
       const isRevoked = Store.isRevoked(cred.id);
       const expiry = getExpiryStatus(cred.expirationDate);
 
+      // Wrapper for the whole item
+      const wrapperDiv = document.createElement('div');
+      wrapperDiv.style.display = 'flex';
+      wrapperDiv.style.flexDirection = 'column';
+
+      const containerDiv = document.createElement('div');
+      containerDiv.className = 'wallet-card-container fade-in';
+      containerDiv.style.width = '100%';
+      containerDiv.style.height = '220px';
+      containerDiv.style.margin = '0';
+      containerDiv.style.perspective = '1000px';
+
       const card = document.createElement('div');
-      card.className = 'credential-card fade-in';
-      card.style.background = typeInfo.gradient.replace('100%)', '8%)');
+      card.className = 'cred-3d-card';
+      const colorHint = typeInfo.color || '#c084fc';
 
-      const headerDiv = document.createElement('div');
-      headerDiv.className = 'credential-card-header';
-      headerDiv.innerHTML = `
-        <div>
-          <div class="credential-card-icon" style="background:${typeInfo.color}22;">${typeInfo.icon}</div>
+      card.style.background = `linear-gradient(135deg, ${colorHint}33 0%, rgba(5, 5, 5, 0.9) 100%), var(--obsidian)`;
+      card.style.borderColor = `${colorHint}66`;
+
+      let statusHtml = '';
+      if (isRevoked) statusHtml = 'REVOKED';
+      else if (expiry.status === 'expired') statusHtml = 'EXPIRED';
+      else statusHtml = 'VERIFIED';
+
+      const badgeColor = isRevoked ? 'rgba(239,68,68,0.2)' : (expiry.status === 'expired' ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.1)');
+      const badgeBorder = isRevoked ? 'var(--accent-red)' : (expiry.status === 'expired' ? 'var(--accent-amber)' : 'rgba(255,255,255,0.3)');
+
+      const subject = cred.credentialSubject || {};
+      const cardName = subject.studentName || subject.name || subject.degree || typeInfo.label;
+      const shortId = cred.id.replace(/[^a-zA-Z0-9]/g, '').substring(0, 16);
+      const padId = shortId.padEnd(16, '0');
+      const formattedId = padId.substring(0, 4) + ' ' + padId.substring(4, 8) + ' ' + padId.substring(8, 12) + ' ' + padId.substring(12, 16);
+      const expStr = new Date(cred.expirationDate).toLocaleString('default', { month: '2-digit', year: '2-digit' });
+
+      card.innerHTML = `
+        <div class="cred-card-top">
+          <div class="cred-card-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;color:${colorHint};"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            CredChain
+          </div>
+          <div class="cred-card-nfc">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a12 12 0 0 1 16 0"/><path d="M7 14.5a7 7 0 0 1 10 0"/><path d="M10 19a3 3 0 0 1 4 0"/></svg>
+          </div>
         </div>
-        <div style="text-align:right;">
-          ${isRevoked ? '<span class="badge badge-revoked">⛔ Revoked</span>' : `<span class="badge ${expiry.class}">${expiry.label}</span>`}
+        <div class="cred-card-middle" style="transform: translateZ(35px); flex: 1; padding: 12px 0; display:flex; flex-direction:column; justify-content:center;">
+          <div style="font-size:0.65rem; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:1px; margin-bottom:2px;">${typeInfo.label}</div>
+          <div style="font-size:1rem; font-weight:500;">${cardName}</div>
         </div>
+        <div class="cred-card-bottom">
+          <div class="cred-card-name">
+            <span>ID: ${cred.id.substring(0, 6)}...</span>
+            <span>${expiry.status !== 'expired' ? 'Exp: ' : ''}${expStr}</span>
+          </div>
+          <div class="cred-card-number">
+             ${formattedId.toUpperCase()}
+          </div>
+        </div>
+        <div class="cred-card-stamp" style="background:${badgeColor}; border-color:${badgeBorder};">${statusHtml}</div>
       `;
-      card.appendChild(headerDiv);
 
-      const typeDiv = document.createElement('div');
-      typeDiv.className = 'credential-card-type';
-      typeDiv.textContent = typeInfo.label;
-      const idDiv = document.createElement('div');
-      idDiv.style.fontSize = '0.65rem';
-      idDiv.style.color = 'var(--text-muted)';
-      idDiv.style.marginBottom = 'var(--space-md)';
-      idDiv.textContent = `ID: ${cred.id.substring(0,18)}...`;
-      card.appendChild(typeDiv);
-      card.appendChild(idDiv);
+      containerDiv.addEventListener('mousemove', (e) => {
+        const rect = containerDiv.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        const rotateX = (-y / (rect.height / 2)) * 15;
+        const rotateY = (x / (rect.width / 2)) * 15;
+        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      });
+      containerDiv.addEventListener('mouseleave', () => {
+        card.style.transform = 'rotateX(0deg) rotateY(0deg)';
+        card.style.transition = 'transform 0.5s ease';
+      });
+      containerDiv.addEventListener('mouseenter', () => {
+        card.style.transition = 'transform 0.1s ease';
+      });
 
-      const issuerDiv = document.createElement('div');
-      issuerDiv.className = 'credential-card-issuer';
-      issuerDiv.textContent = `Issued by ${cred.issuer.name}`;
-      card.appendChild(issuerDiv);
-
-      const bodyDiv = document.createElement('div');
-      bodyDiv.className = 'credential-card-body';
-      bodyDiv.innerHTML = renderCardFields(cred, typeInfo);
-      card.appendChild(bodyDiv);
+      containerDiv.appendChild(card);
+      wrapperDiv.appendChild(containerDiv);
 
       const actionsDiv = document.createElement('div');
       actionsDiv.className = 'credential-card-actions';
+      actionsDiv.style.borderTop = 'none';
+      actionsDiv.style.justifyContent = 'center';
+      actionsDiv.style.marginTop = '8px';
 
       const detailBtn = document.createElement('button');
       detailBtn.type = 'button';
@@ -308,8 +353,8 @@
         actionsDiv.appendChild(disabledBtn);
       }
 
-      card.appendChild(actionsDiv);
-      container.appendChild(card);
+      wrapperDiv.appendChild(actionsDiv);
+      container.appendChild(wrapperDiv);
     });
   }
 
@@ -551,7 +596,7 @@
             confirmBtn.textContent = '📤 Generate Presentation';
             return;
           }
-          
+
           // Scale GPA: 8.7 → 87 (multiply by 10, round to int)
           const scaledGpa = Math.round(actualValue * 10);
 
@@ -560,9 +605,9 @@
 
           // Generate REAL Groth16 proof using snarkjs
           console.log(`[ZKP] Generating Groth16 proof: gpa=${scaledGpa} > threshold=${threshold}`);
-          
+
           if (scaledGpa <= threshold) {
-            showToast(`Cannot prove ${key} > ${threshold/10}: actual value doesn't satisfy the constraint`, 'error');
+            showToast(`Cannot prove ${key} > ${threshold / 10}: actual value doesn't satisfy the constraint`, 'error');
             confirmBtn.disabled = false;
             confirmBtn.textContent = '📤 Generate Presentation';
             return;
@@ -699,13 +744,13 @@
   // ── Show Presentation Result (with QR) ─────────────────────────
   function showPresentationResult(code, presentation) {
     const body = document.getElementById('result-modal-body');
-    
+
     const zkpFields = Object.keys(presentation.credential.zkpProofs);
-    const zkpInfo = zkpFields.length > 0 
+    const zkpInfo = zkpFields.length > 0
       ? zkpFields.map(k => {
-          const p = presentation.credential.zkpProofs[k];
-          return `<br><span class="zkp-badge">ZKP Groth16</span> ${p.claim}`;
-        }).join('')
+        const p = presentation.credential.zkpProofs[k];
+        return `<br><span class="zkp-badge">ZKP Groth16</span> ${p.claim}`;
+      }).join('')
       : '';
 
     const blockchain = presentation.blockchain || {};

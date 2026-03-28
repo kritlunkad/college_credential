@@ -626,6 +626,136 @@
         display: none;
       }
     }
+
+    /* ── 3D Interactive Credential Card ────────────────────── */
+    .wallet-header-area {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 48px;
+      gap: 40px;
+    }
+
+    .wallet-header-text {
+      flex: 1;
+    }
+
+    .wallet-card-container {
+      perspective: 1000px;
+      width: 340px;
+      height: 215px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 800px) {
+      .wallet-header-area {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .wallet-card-container {
+        margin: 0 auto;
+        margin-top: 32px;
+        width: 100%;
+        max-width: 340px;
+      }
+    }
+
+    .cred-3d-card {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.18) 0%, rgba(5, 5, 5, 0.9) 100%), var(--obsidian);
+      border-radius: 20px;
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.1s;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: var(--bone);
+      overflow: hidden;
+      cursor: grab;
+    }
+
+    .cred-3d-card:active {
+      cursor: grabbing;
+    }
+
+    .cred-3d-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(125deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 40%);
+      pointer-events: none;
+      border-radius: 20px;
+      transform: translateZ(1px);
+    }
+
+    .cred-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transform: translateZ(30px);
+    }
+
+    .cred-card-logo {
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cred-card-logo svg {
+      width: 18px;
+      height: 18px;
+      color: #c084fc;
+    }
+
+    .cred-card-nfc {
+      color: var(--silver);
+    }
+
+    .cred-card-bottom {
+      transform: translateZ(40px);
+    }
+
+    .cred-card-name {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .cred-card-number {
+      font-family: 'SF Mono', monospace;
+      font-size: 1.2rem;
+      letter-spacing: 4px;
+      font-weight: 600;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .cred-card-stamp {
+      position: absolute;
+      bottom: 20px;
+      right: 24px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(4px);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #fff;
+      transform: translateZ(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
   </style>
 </head>
 
@@ -637,11 +767,10 @@
         <img src="assets/trustlessid logo.png" alt="TrustlessID Logo"
           style="height: 70px; width: auto; object-fit: contain;">
         CredChain <span
-          style="font-size: 10px; color: var(--silver); font-weight: normal; margin-left: 8px; margin-top: 6px;">Student
-          Wallet</span>
+          style="font-size: 0.75rem; color: var(--bone); font-weight: 700; margin-left: 16px; padding: 4px 12px; background: rgba(255,255,255,0.06); border-radius: 100px; border: 1px solid rgba(255,255,255,0.12); letter-spacing: 0.5px; text-transform: uppercase;">STUDENT
+          WALLET</span>
       </a>
       <ul class="nav-links">
-        <li><a href="index.html" class="nav-link">Home</a></li>
         <li><a href="college.html" class="nav-link">Issuer Portal</a></li>
         <li>
           <div class="status-indicator">
@@ -719,7 +848,6 @@
     <div class="section">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <h2 style="font-size: 1.2rem;">Verified Credentials</h2>
-        <a href="index.html" class="back-link">Home</a>
       </div>
       <div class="credential-grid" id="wallet-cards"></div>
       <div id="wallet-empty" class="empty-state">
