@@ -5,165 +5,334 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Student Credential Wallet — Claim, hold, and selectively share your verifiable academic credentials with zero-knowledge proofs.">
   <title>Student Wallet — CredChain Holder</title>
-  <link rel="stylesheet" href="css/style.css?v=20260328-10">
+  <style>
+    :root {
+      --obsidian: #050505;
+      --bone: #F5F5F0;
+      --silver: #C8C8CC;
+      --ghost: rgba(255, 255, 255, 0.04);
+      --ghost-border: rgba(255, 255, 255, 0.08);
+      --accent: #FFFFFF;
+      --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--obsidian); color: var(--bone); min-height: 100vh; overflow-x: hidden; line-height: 1.5; }
+
+    /* ── Header ────────────────────────────────────────────── */
+    .app-header {
+      padding: 24px 40px; border-bottom: 1px solid var(--ghost-border);
+      display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; background: rgba(5, 5, 5, 0.8); backdrop-filter: blur(20px); z-index: 100;
+    }
+
+    .app-brand { display: flex; align-items: center; gap: 12px; }
+    .app-brand-icon {
+      width: 32px; height: 32px; background: var(--accent); color: var(--obsidian);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;
+    }
+    .app-brand-name { font-weight: 700; letter-spacing: -0.5px; font-size: 1.1rem; }
+    .back-link { color: var(--silver); text-decoration: none; font-size: 0.85rem; }
+
+    .status-indicator { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--silver); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 10px #4ade80; }
+
+    /* ── Step Tracker ───────────────────────────────────────── */
+    .step-track {
+      display: flex; align-items: center; justify-content: center; gap: 12px; padding: 40px 0; max-width: 400px; margin: 0 auto;
+    }
+    .step-circle {
+      width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--ghost-border);
+      display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: var(--silver); transition: all 0.4s var(--ease);
+    }
+    .step-circle.active { background: var(--accent); color: var(--obsidian); border-color: var(--accent); }
+    .step-circle.done { color: var(--accent); border-color: var(--accent); }
+    .step-connector { height: 1.5px; flex-grow: 1; background: var(--ghost-border); }
+    .step-connector.done { background: var(--accent); }
+
+    /* ── Main Layout ───────────────────────────────────────── */
+    .page-title { font-size: 2.2rem; font-weight: 700; letter-spacing: -1px; margin-bottom: 12px; }
+    .gradient-text { 
+      background: linear-gradient(90deg, #fff, #888); 
+      -webkit-background-clip: text; 
+      background-clip: text;
+      -webkit-text-fill-color: transparent; 
+    }
+    .page-subtitle { color: var(--silver); font-size: 1rem; max-width: 700px; margin-bottom: 40px; opacity: 0.8; }
+
+    /* ── Cards & Interactive Elements ──────────────────────── */
+    .card {
+      background: var(--ghost); border: 1px solid var(--ghost-border); border-radius: 20px; padding: 32px; margin-bottom: 32px;
+      transition: all 0.4s var(--ease);
+    }
+    .card:hover { border-color: rgba(255, 255, 255, 0.15); background: rgba(255, 255, 255, 0.04); }
+
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+    .card-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 4px; }
+    .card-subtitle { font-size: 0.85rem; color: var(--silver); opacity: 0.7; }
+
+    .card-tag {
+      padding: 4px 12px; border-radius: 100px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; border: 1px solid transparent;
+    }
+    .card-tag.green { background: rgba(34, 197, 94, 0.1); color: #4ade80; border-color: rgba(34, 197, 94, 0.2); }
+    .card-tag.purple { background: rgba(168, 85, 247, 0.1); color: #c084fc; border-color: rgba(168, 85, 247, 0.2); }
+
+    .claim-bar { display: flex; gap: 12px; }
+    .form-input {
+      flex: 1; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--ghost-border);
+      color: var(--bone); padding: 14px 20px; border-radius: 12px; font-size: 0.95rem; outline: none; transition: all 0.3s;
+    }
+    .form-input:focus { border-color: rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.06); }
+
+    .btn {
+      padding: 12px 28px; border-radius: 100px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: none; transition: all 0.3s var(--ease);
+    }
+    .btn-primary { background: var(--accent); color: var(--obsidian); }
+    .btn-secondary { background: var(--ghost); color: var(--bone); border: 1px solid var(--ghost-border); }
+    .btn-ghost { background: transparent; color: var(--silver); }
+    .btn-ghost:hover { background: var(--ghost); color: var(--bone); }
+    .btn-sm { padding: 10px 20px; font-size: 0.8rem; }
+
+    /* ── Credential Cards ──────────────────────────────────── */
+    .credential-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin-top: 24px; }
+    
+    .credential-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--ghost-border);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.4s var(--ease);
+      min-height: 240px;
+      position: relative;
+      overflow: hidden;
+    }
+    .credential-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }
+
+    .credential-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .credential-card-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+    .credential-card-type { font-weight: 700; font-size: 1.1rem; margin-bottom: 4px; }
+    .credential-card-issuer { font-size: 0.8rem; color: var(--silver); opacity: 0.6; margin-bottom: 16px; }
+
+    .credential-field { display: flex; flex-direction: column; gap: 2px; margin-bottom: 12px; }
+    .credential-field-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--silver); opacity: 0.5; }
+    .credential-field-value { font-size: 0.9rem; font-weight: 500; }
+
+    .credential-card-actions { margin-top: auto; display: flex; gap: 10px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+    /* ── Selective Disclosure Toggles ────────────────────────── */
+    .toggle-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 16px; background: rgba(255,255,255,0.02);
+      border: 1px solid var(--ghost-border); border-radius: 12px; margin-bottom: 8px;
+    }
+    .toggle-info { display: flex; flex-direction: column; gap: 2px; }
+    .toggle-label { font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .toggle-value { font-size: 0.75rem; color: var(--silver); opacity: 0.6; }
+
+    .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; cursor: pointer; inset: 0; background-color: var(--ghost-border);
+      transition: .4s; border-radius: 24px;
+    }
+    .toggle-slider:before {
+      position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+      background-color: var(--silver); transition: .4s; border-radius: 50%;
+    }
+    input:checked + .toggle-slider { background-color: #4ade80; }
+    input:checked + .toggle-slider:before { transform: translateX(20px); background-color: white; }
+
+    .zkp-badge {
+      background: rgba(168, 85, 247, 0.15); color: #c084fc;
+      padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: 700;
+      text-transform: uppercase; border: 1px solid rgba(168, 85, 247, 0.2);
+    }
+
+    .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+    .badge-valid { background: rgba(34, 197, 94, 0.1); color: #4ade80; }
+    .badge-expiring { background: rgba(234, 179, 8, 0.1); color: #fbbf24; }
+    .badge-revoked { background: rgba(239, 68, 68, 0.1); color: #f87171; }
+
+    /* ── Verification Display ──────────────────────────────── */
+    .verification-code-display {
+      font-family: 'SF Mono', monospace; font-size: 1.5rem; letter-spacing: 0.2em; font-weight: 700;
+      background: var(--ghost); border: 1px dashed var(--ghost-border); padding: 20px;
+      border-radius: 16px; margin-bottom: 24px; color: var(--accent); cursor: pointer; text-align: center;
+    }
+    .qr-container { background: white; padding: 20px; border-radius: 20px; margin-bottom: 24px; display: inline-block; }
+
+    .empty-state { text-align: center; padding: 80px 20px; color: var(--silver); opacity: 0.5; border: 1px dashed var(--ghost-border); border-radius: 20px; }
+    .empty-state-icon { font-size: 2.5rem; margin-bottom: 16px; }
+
+    .toast-container { position: fixed; bottom: 32px; right: 32px; z-index: 2000; display: flex; flex-direction: column; gap: 12px; }
+    .toast {
+      background: #0A0A0A; border: 1px solid var(--ghost-border); color: var(--bone);
+      padding: 12px 20px; border-radius: 12px; font-size: 0.85rem; min-width: 240px;
+      display: flex; align-items: center; gap: 12px; backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    /* ── Modals ────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+      display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: 0.4s;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal {
+      background: #0A0A0A; border: 1px solid var(--ghost-border); border-radius: 24px; padding: 40px;
+      width: 90%; max-width: 500px; transform: scale(0.9); transition: 0.4s var(--ease);
+    }
+    .modal-overlay.active .modal { transform: scale(1); }
+
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .modal-close { background: none; border: none; color: var(--silver); font-size: 1.2rem; cursor: pointer; }
+
+    /* ── Mobile ────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .app-header { padding: 16px 20px; }
+      .app-container { padding: 0 20px 40px; }
+      .claim-bar { flex-direction: column; }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- ═══ Header ═══ -->
   <header class="app-header">
     <div class="app-brand">
-      <div class="app-brand-icon">⟐</div>
+      <img src="assets/trustlessid logo.png" alt="TrustlessID Logo" style="height: 26px; width: auto; object-fit: contain; margin-right: 4px;">
       <div>
         <div class="app-brand-name">CredChain</div>
-        <div class="app-brand-sub">Student Wallet</div>
+        <div class="app-brand-sub" style="font-size: 10px; color: #888;">Student Wallet</div>
       </div>
     </div>
     <div class="app-header-right">
-      <a href="index.html" class="back-link">← Back to Home</a>
-      <div class="network-badge">
+      <div class="status-indicator">
         <span class="dot"></span>
-        Holder Active
+        <span>Holder Active</span>
       </div>
     </div>
   </header>
 
-  <!-- ═══ Step Progress Track ═══ -->
   <div class="step-track">
-    <div class="step-circle done">✓</div>
-    <div class="step-connector done"></div>
-    <div class="step-circle active">2</div>
+    <div class="step-circle active">1</div>
+    <div class="step-connector"></div>
+    <div class="step-circle">2</div>
     <div class="step-connector"></div>
     <div class="step-circle">3</div>
-    <div class="step-connector"></div>
-    <div class="step-circle">4</div>
   </div>
 
-  <!-- ═══ Main Content ═══ -->
   <main class="app-container">
-
-    <!-- Page Header -->
-    <div style="margin-bottom: 32px;">
-      <h1 class="page-title">
-        👛 <span class="gradient-text">Student Wallet</span>
-      </h1>
-      <p class="page-subtitle">Your credentials, your control. Claim credentials issued by your college, then selectively share them with verifiers using toggle switches.</p>
+    <div style="margin-bottom: 48px;">
+      <h1 class="page-title"><span class="gradient-text">My Identity</span> Wallet</h1>
+      <p class="page-subtitle">Your credentials, your control. Claim your verification records and share them securely without revealing your entire profile.</p>
     </div>
 
     <!-- Student Auth -->
-    <div class="card" style="margin-bottom: var(--space-lg);">
-      <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: var(--space-md);">Student Authentication</h3>
-      <div style="display:flex; gap: var(--space-sm); align-items:center; flex-wrap: wrap;">
-        <button class="btn btn-primary btn-sm" id="btn-student-login">🔐 Sign in with Google</button>
-        <button class="btn btn-ghost btn-sm" id="btn-student-logout">Logout</button>
-        <button class="btn btn-ghost btn-sm" id="btn-student-biometric">🧬 Enable Biometric</button>
-      </div>
-      <div id="student-auth-status" style="font-size:0.78rem; color:var(--text-secondary); margin-top: var(--space-sm);">Not authenticated</div>
-    </div>
-
-    <!-- Holder Wallet -->
     <div class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">Student MetaMask Wallet</div>
-          <div class="card-subtitle">Connect to anchor presentations on-chain</div>
+          <div class="card-title">Cloud Identity</div>
+          <div class="card-subtitle">Secure access to your verified assets</div>
         </div>
-        <div class="card-tag purple">Blockchain</div>
       </div>
-      <div style="display:flex; gap: 8px; align-items:center; flex-wrap: wrap;">
-        <button class="btn btn-secondary btn-sm" id="btn-connect-holder-wallet">🦊 Connect Student Wallet</button>
-        <span id="holder-wallet-status" style="font-size:12px; color:var(--text-secondary);">Not connected</span>
+      <div style="display:flex; gap: 12px; align-items:center; flex-wrap: wrap;">
+        <button class="btn btn-primary btn-sm" id="btn-student-login">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+          Sign in with Google
+        </button>
+        <button class="btn btn-ghost btn-sm" id="btn-student-logout">Logout</button>
+        <button class="btn btn-ghost btn-sm" id="btn-student-biometric">🧬 Biometric Auth</button>
       </div>
-      <div id="holder-wallet-address" style="font-size:11px; color:var(--text-muted); margin-top: 8px; word-break: break-all; font-family: 'SF Mono', 'Fira Code', monospace;">—</div>
+      <div id="student-auth-status" style="font-size:0.75rem; color:var(--silver); margin-top: 16px; opacity:0.6;">Not authenticated</div>
     </div>
 
     <!-- Claim Credentials -->
-    <div class="section">
-      <h2 class="section-title">Claim your credentials</h2>
-      <div class="card active-card">
+    <div class="section" style="margin-bottom: 64px;">
+      <h2 style="font-size: 1.2rem; margin-bottom: 24px;">Claim Academic Records</h2>
+      <div class="card">
         <div class="card-header">
-          <div>
-            <div class="card-title">Claim Credentials</div>
-            <div class="card-subtitle">Enter your enrollment ID to claim credentials issued by your college</div>
-          </div>
-          <div class="card-tag green">Step 1</div>
+          <div><div class="card-title">Enrollment Access</div></div>
+          <div class="card-tag green">Verification Core</div>
         </div>
         <div class="claim-bar">
-          <input type="text" class="form-input" id="claim-enrollment-id" placeholder="e.g. SNU2024001">
-          <button class="btn btn-primary" id="btn-claim">🔑 Claim</button>
+          <input type="text" class="form-input" id="claim-enrollment-id" placeholder="Enrollment ID (e.g. SNU2024001)">
+          <button class="btn btn-primary" id="btn-claim">Claim Records</button>
         </div>
-        <div class="claim-bar" style="margin-top: var(--space-sm);">
-          <input type="text" class="form-input" id="claim-code" placeholder="Or enter Claim Code (e.g. Q9X2K7LM)" style="text-transform:uppercase;">
-          <button class="btn btn-ghost" id="btn-claim-code">🎫 Claim via Code</button>
+        <div class="claim-bar" style="margin-top: 16px;">
+          <input type="text" class="form-input" id="claim-code" placeholder="Claim Code" style="text-transform:uppercase;">
+          <button class="btn btn-secondary" id="btn-claim-code">Claim via Code</button>
         </div>
-        <div id="claim-result" style="margin-top: var(--space-md);"></div>
+        <div id="claim-result"></div>
       </div>
     </div>
 
-    <!-- My Credentials -->
+    <!-- My Wallet Content -->
     <div class="section">
-      <h2 class="section-title">My credentials</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="font-size: 1.2rem;">Verified Credentials</h2>
+        <a href="index.html" class="back-link">Home</a>
+      </div>
       <div class="credential-grid" id="wallet-cards"></div>
       <div id="wallet-empty" class="empty-state">
-        <div class="empty-state-icon">👛</div>
-        <div class="empty-state-title">No credentials in your wallet</div>
-        <p style="color: var(--text-muted); font-size: 13px;">Claim credentials above using your enrollment ID.</p>
+        <div class="empty-state-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+        </div>
+        <div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 4px;">Empty Wallet</div>
+        <p style="font-size: 0.85rem; opacity: 0.7;">Start by claiming credentials issued by your university.</p>
       </div>
     </div>
 
-    <!-- My Presentations -->
-    <div class="section">
-      <h2 class="section-title">Shared presentations</h2>
+    <!-- Shared Histoy -->
+    <div class="section" style="margin-top: 64px;">
+      <h2 style="font-size: 1.1rem; margin-bottom: 24px; color: #888;">Shared Presentations</h2>
       <div id="presentations-list"></div>
-      <div id="presentations-empty" class="empty-state" style="padding: 40px;">
-        <div class="empty-state-icon">📤</div>
-        <div class="empty-state-title">No presentations yet</div>
-        <p style="color: var(--text-muted); font-size: 13px;">Share a credential to generate a verifiable presentation.</p>
+      <div id="presentations-empty" style="text-align: center; padding: 40px; border-top: 1px solid var(--ghost-border);">
+        <p style="font-size: 0.85rem; color: #555;">No sharing history found.</p>
       </div>
     </div>
   </main>
 
-  <!-- Share Modal -->
+  <!-- Modals (Stylized Glass) -->
   <div class="modal-overlay" id="share-modal">
     <div class="modal">
       <div class="modal-header">
-        <h3 class="modal-title" id="share-modal-title">Share Credential</h3>
+        <h3 id="share-modal-title">Share Credential</h3>
         <button class="modal-close" id="share-modal-close">✕</button>
       </div>
-      <div id="share-modal-body"></div>
-      <div class="modal-footer">
+      <div id="share-modal-body" style="margin-bottom: 32px;"></div>
+      <div style="display: flex; gap: 12px;">
+        <button class="btn btn-primary" id="share-modal-confirm" style="flex: 1;">Generate Presentation</button>
         <button class="btn btn-ghost" id="share-modal-cancel">Cancel</button>
-        <button class="btn btn-success" id="share-modal-confirm">📤 Generate Presentation</button>
       </div>
     </div>
   </div>
 
-  <!-- Presentation Result Modal -->
-  <div class="modal-overlay" id="result-modal">
-    <div class="modal" style="text-align:center;">
-      <div class="modal-header">
-        <h3 class="modal-title">Presentation Created!</h3>
-        <button class="modal-close" id="result-modal-close">✕</button>
-      </div>
-      <div id="result-modal-body"></div>
-    </div>
-  </div>
-
-  <!-- Credential Detail Modal -->
   <div class="modal-overlay" id="detail-modal">
     <div class="modal">
       <div class="modal-header">
-        <h3 class="modal-title" id="detail-modal-title">Credential Details</h3>
+        <h3 id="detail-modal-title">Record Details</h3>
         <button class="modal-close" id="detail-modal-close">✕</button>
       </div>
-      <div id="detail-modal-body"></div>
-      <div class="modal-footer">
+      <div id="detail-modal-body" style="margin-bottom: 32px;"></div>
+      <div style="display: flex; gap: 12px;">
+        <button class="btn btn-primary" id="detail-modal-share" style="flex: 1;">📤 Share Securely</button>
         <button class="btn btn-ghost" id="detail-modal-dismiss">Close</button>
-        <button class="btn btn-success" id="detail-modal-share">📤 Share This</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast Container -->
+  <div class="modal-overlay" id="result-modal">
+    <div class="modal" style="text-align: center;">
+      <h3 style="margin-bottom: 24px;">Success!</h3>
+      <div id="result-modal-body"></div>
+      <button class="btn btn-primary" id="result-modal-close" style="margin-top: 32px; width: 100%;">Got it</button>
+    </div>
+  </div>
+
   <div class="toast-container" id="toast-container"></div>
 
   <script src="js/qrcode.min.js?v=20260328-10"></script>
