@@ -101,6 +101,7 @@
     return { payload: null, evidence };
   }
 
+
   function renderIssuerWallet() {
     const statusEl = document.getElementById('issuer-wallet-status');
     const dotEl = statusEl?.querySelector('.dot');
@@ -363,6 +364,7 @@
       return;
     }
 
+
     if (typeof BiometricAuth !== 'undefined' && BiometricAuth.isEnabled()) {
       try {
         const ok = await BiometricAuth.verify();
@@ -388,6 +390,7 @@
       credential.documentEvidence = sourceDoc.evidence;
     }
 
+
     // Embed issuer's public key for self-contained verification
     credential.issuerPublicKey = publicKeyJwk;
 
@@ -404,6 +407,9 @@
 
     // Save
     Store.saveCredential(credential);
+    if (sourceDoc.evidence) {
+      showToast('Upload doc successful', 'success');
+    }
     if (cloudAuthEnabled && typeof CloudApi !== 'undefined') {
       try {
         const cloudRes = await CloudApi.issueCredential(credential, assignedStudentEmail, null);
@@ -427,9 +433,6 @@
         Store.updateCredentialById(credential.id, { emailDelivery: credential.emailDelivery });
         showToast(`Credential issued locally, cloud sync failed: ${e.message}`, 'error');
       }
-    }
-    if (sourceDoc.evidence) {
-      showToast('Upload doc successful', 'success');
     }
     Store.appendAuditLog({
       event: 'issued',
@@ -647,6 +650,7 @@
       showToast('Upload doc successful', 'success');
     });
   }
+
 
   // Re-register public key when issuer name changes
   document.getElementById('issuer-name').addEventListener('change', () => {
