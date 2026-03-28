@@ -39,7 +39,7 @@
     const cardLogout = document.getElementById('btn-admin-logout');
 
     if (headerLogout) {
-      headerLogout.style.display = adminUser ? 'inline-block' : 'none';
+      headerLogout.style.display = 'inline-block';
     }
     if (cardLogout) {
       cardLogout.style.display = adminUser ? 'none' : 'inline-block';
@@ -53,7 +53,7 @@
       }
       if (loginCard) loginCard.style.display = 'none';
       if (walletCard) walletCard.style.display = 'none';
-      
+
       // Default to issue section if everything was hidden
       if (issueSection && dashboardSection && auditSection) {
         const isAnySectionVisible = [issueSection, dashboardSection, auditSection].some(s => s.style.display === 'block');
@@ -527,7 +527,7 @@
 
     if (filterTerm) {
       const term = filterTerm.toLowerCase();
-      credentials = credentials.filter(c => 
+      credentials = credentials.filter(c =>
         c.credentialSubject.name.toLowerCase().includes(term) ||
         c.credentialSubject.enrollmentId.toLowerCase().includes(term) ||
         c.id.toLowerCase().includes(term)
@@ -651,10 +651,10 @@
   // ── Toast notifications ─────────────────────────────────────────
   function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
-    const icons = { 
-      success: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: #4ade80;"><path d="M20 6L9 17L4 12"></path></svg>', 
-      error: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: #f87171;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>', 
-      info: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: #c084fc;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>' 
+    const icons = {
+      success: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: #4ade80;"><path d="M20 6L9 17L4 12"></path></svg>',
+      error: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: #f87171;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+      info: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: #c084fc;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>'
     };
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;

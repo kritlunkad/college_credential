@@ -113,9 +113,9 @@ img {
 .nav-brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   color: var(--text-primary);
   letter-spacing: -0.3px;
 }
@@ -141,9 +141,9 @@ img {
 
 .nav-link {
   color: var(--text-secondary);
-  padding: 8px 18px;
+  padding: 10px 20px;
   border-radius: 100px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 500;
   transition: all 0.35s var(--ease);
 }
@@ -156,12 +156,12 @@ img {
 .nav-cta {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background: var(--white);
   color: var(--obsidian);
-  padding: 9px 22px;
+  padding: 11px 24px;
   border-radius: 100px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   transition: all 0.35s var(--ease);
   border: none;
