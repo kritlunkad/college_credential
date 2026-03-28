@@ -3,165 +3,297 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Decentralized college credential verification system with cryptographic proofs and selective disclosure. Issue, hold, and verify academic credentials.">
-  <title>CredChain — Decentralized College Credentials</title>
-  <link rel="stylesheet" href="css/style.css">
+  <meta name="description" content="CredChain — Decentralized college credential verification with cryptographic proofs, zero-knowledge range proofs, and selective disclosure. Issue, hold, and verify academic credentials trustlessly.">
+  <title>CredChain — Verifiable College Credentials</title>
+  <link rel="stylesheet" href="landing.css">
 </head>
 <body>
 
-  <!-- Nav -->
-  <nav class="nav">
+  <!-- ════════════════════════════════════════════════════════════
+       FIXED NAVIGATION
+       ════════════════════════════════════════════════════════════ -->
+  <nav class="nav" id="nav">
     <div class="nav-inner">
       <a href="index.html" class="nav-brand">
         <div class="nav-brand-icon">⟐</div>
         CredChain
       </a>
       <ul class="nav-links">
-        <li><a href="index.html" class="nav-link active">Home</a></li>
-        <li><a href="college.html" class="nav-link"><span class="nav-role-badge issuer">Issuer</span> College</a></li>
-        <li><a href="wallet.html" class="nav-link"><span class="nav-role-badge holder">Holder</span> Wallet</a></li>
-        <li><a href="verifier.html" class="nav-link"><span class="nav-role-badge verifier">Verifier</span> Verify</a></li>
+        <li><a href="#features" class="nav-link">Features</a></li>
+        <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
+        <li><a href="college.html" class="nav-link">Issuer Portal</a></li>
       </ul>
+      <a href="college.html" class="nav-cta">Launch App →</a>
     </div>
   </nav>
 
-  <!-- Hero -->
+  <!-- ════════════════════════════════════════════════════════════
+       HERO SECTION
+       ════════════════════════════════════════════════════════════ -->
   <section class="hero">
+    <div class="hero-badge">
+      <span class="pulse-dot"></span>
+      Built on W3C VCs · Powered by Zero-Knowledge Proofs
+    </div>
     <h1 class="hero-title">
-      <span class="gradient-text">Stronger verification,</span><br>
-      less fraud
+      Stronger verification,<br>
+      <span class="gradient-text">less fraud.</span>
     </h1>
     <p class="hero-subtitle">
-      Stop forged transcripts, fake degrees, and impersonation with secure, cryptographic credentials.
-      Built on the W3C Verifiable Credentials trust triangle — students own their data, colleges sign it,
-      and anyone can verify it instantly.
+      Stop forged transcripts and fake degrees with cryptographic credentials. Students own their data, colleges sign it, and anyone can verify it — instantly and trustlessly.
     </p>
-    <div class="hero-cta">
-      <a href="college.html" class="btn btn-primary btn-lg">🏫 Issue Credentials</a>
-      <a href="wallet.html" class="btn btn-success btn-lg">👛 Open Wallet</a>
-      <a href="verifier.html" class="btn btn-ghost btn-lg">🔍 Verify a Student</a>
+    <div class="hero-buttons">
+      <a href="college.html" class="btn-hero-primary">Issue Credentials →</a>
+      <a href="wallet.html" class="btn-hero-secondary">Open Your Wallet</a>
     </div>
   </section>
 
-  <!-- How It Works -->
-  <div class="page">
-    <div class="section">
-      <h2 class="section-title">How it works</h2>
-      <div class="flow-steps">
-        <div class="flow-step card">
-          <div class="flow-step-number">1</div>
-          <h3 class="flow-step-title">College Issues</h3>
-          <p class="flow-step-desc">
-            The university digitally signs academic credentials (transcripts, identity, achievements) with their
-            private key. The public key is embedded in the credential for self-contained verification.
-          </p>
-        </div>
-        <div class="flow-step card">
-          <div class="flow-step-number">2</div>
-          <h3 class="flow-step-title">Student Holds</h3>
-          <p class="flow-step-desc">
-            Credentials live in the student's wallet — not in a central database. Students control what they
-            share using toggle switches, and can prove claims (like GPA&nbsp;>&nbsp;8.0) without revealing exact values.
-          </p>
-        </div>
-        <div class="flow-step card">
-          <div class="flow-step-number">3</div>
-          <h3 class="flow-step-title">Third Party Verifies</h3>
-          <p class="flow-step-desc">
-            Employers, scholarship boards, or any verifier enters a code or scans a QR. The system checks the
-            issuer's digital signature and validates any ZKP range proofs — instant, mathematical trust.
-          </p>
-        </div>
+  <!-- ════════════════════════════════════════════════════════════
+       FEATURE 1 — Selective Disclosure (Phone Mockup)
+       ════════════════════════════════════════════════════════════ -->
+  <div id="features">
+    <section class="feature-section reveal">
+      <div class="feature-text">
+        <h2>Share only what<br>you choose.</h2>
+        <div class="feature-divider"></div>
+        <p>Students control exactly which fields to reveal. Show your major without exposing your GPA, or prove enrollment without sharing personal details.</p>
+        <p>Toggle switches let you selectively disclose each field — your data stays yours, shared on your terms.</p>
       </div>
-    </div>
-
-    <!-- Features -->
-    <div class="section">
-      <h2 class="section-title">Built for trust</h2>
-      <div class="features-grid">
-        <div class="feature-card card">
-          <div class="feature-icon">🔐</div>
-          <h3 class="feature-title">Cryptographic Signatures</h3>
-          <p class="feature-desc">
-            ECDSA P-256 digital signatures via Web Crypto API. Every credential is mathematically bound
-            to the issuing institution — tamper-proof by design.
-          </p>
-        </div>
-        <div class="feature-card card">
-          <div class="feature-icon">🎛️</div>
-          <h3 class="feature-title">Selective Disclosure</h3>
-          <p class="feature-desc">
-            Students choose exactly which fields to share. Show your major without revealing your GPA,
-            or prove enrollment without exposing personal details.
-          </p>
-        </div>
-        <div class="feature-card card">
-          <div class="feature-icon">🧮</div>
-          <h3 class="feature-title">Zero-Knowledge Proofs</h3>
-          <p class="feature-desc">
-            Prove your GPA is above a threshold without revealing the exact number. SHA-256 commitment
-            binds the range claim to the signed credential.
-          </p>
-        </div>
-        <div class="feature-card card">
-          <div class="feature-icon">📱</div>
-          <h3 class="feature-title">QR Code Sharing</h3>
-          <p class="feature-desc">
-            Generate a QR code for any verifiable presentation. Verifiers scan and get instant results — 
-            perfect for in-person verification.
-          </p>
-        </div>
-        <div class="feature-card card">
-          <div class="feature-icon">⏱️</div>
-          <h3 class="feature-title">Expiry & Revocation</h3>
-          <p class="feature-desc">
-            Credentials expire naturally, and issuers can revoke them. The verifier checks both before
-            accepting any proof.
-          </p>
-        </div>
-        <div class="feature-card card">
-          <div class="feature-icon">🏛️</div>
-          <h3 class="feature-title">Multi-Issuer Trust</h3>
-          <p class="feature-desc">
-            Support credentials from multiple institutions. Each issuer registers their own key pair — 
-            verifiers trust the cryptography, not a single database.
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Trust Triangle Diagram -->
-    <div class="section" style="text-align:center; padding: var(--space-2xl) 0;">
-      <h2 class="section-title">The trust triangle</h2>
-      <div class="card" style="display:inline-block; padding: var(--space-2xl); max-width: 600px;">
-        <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 2;">
-          <div style="margin-bottom: var(--space-lg);">
-            <span style="font-size: 2rem;">🏫</span><br>
-            <strong style="color: var(--text-primary);">Issuer</strong> (College)<br>
-            Signs credentials with private key
-          </div>
-          <div style="display: flex; justify-content: space-between; max-width: 400px; margin: 0 auto;">
-            <div>
-              <span style="font-size: 2rem;">👛</span><br>
-              <strong style="color: var(--text-primary);">Holder</strong> (Student)<br>
-              Controls & selectively shares
-            </div>
-            <div>
-              <span style="font-size: 2rem;">🔍</span><br>
-              <strong style="color: var(--text-primary);">Verifier</strong> (Third Party)<br>
-              Checks signature & proofs
+      <div class="feature-visual">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="phone-screen-header">My Credential</div>
+            <div class="phone-credential-card">
+              <div class="phone-credential-title">Academic Transcript</div>
+              <div class="phone-credential-sub">Shiv Nadar University</div>
+              <div class="phone-toggle-row">
+                <span class="phone-toggle-label">Full Name</span>
+                <div class="phone-toggle on" data-toggle="0"></div>
+              </div>
+              <div class="phone-toggle-row">
+                <span class="phone-toggle-label">Enrollment ID</span>
+                <div class="phone-toggle on" data-toggle="1"></div>
+              </div>
+              <div class="phone-toggle-row">
+                <span class="phone-toggle-label">Major / Branch</span>
+                <div class="phone-toggle" data-toggle="2"></div>
+              </div>
+              <div class="phone-toggle-row">
+                <span class="phone-toggle-label">GPA Score</span>
+                <div class="phone-toggle" data-toggle="3"></div>
+              </div>
+              <div class="phone-toggle-row">
+                <span class="phone-toggle-label">Graduation Year</span>
+                <div class="phone-toggle on" data-toggle="4"></div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════
+         FEATURE 2 — Cryptographic Trust (Stacked Card List)
+         ════════════════════════════════════════════════════════════ -->
+    <section class="feature-section reveal">
+      <div class="feature-text">
+        <h2>Cryptographic trust,<br>zero databases.</h2>
+        <div class="feature-divider"></div>
+        <p>Every credential is sealed with ECDSA P-256 digital signatures via the Web Crypto API. Tamper-proof by design — no central database needed.</p>
+        <p>Verifiers trust the math, not a middleman. Replay detection, expiry checks, and revocation are baked into every verification flow.</p>
+      </div>
+      <div class="feature-visual">
+        <div class="stacked-cards">
+          <div class="stack-card">
+            <div class="stack-card-icon green">🔐</div>
+            <div class="stack-card-text">
+              <div class="stack-card-title">ECDSA P-256 Signatures</div>
+              <div class="stack-card-desc">Mathematically bound to the issuer</div>
+            </div>
+          </div>
+          <div class="stack-card">
+            <div class="stack-card-icon purple">🛡️</div>
+            <div class="stack-card-text">
+              <div class="stack-card-title">Tamper Detection</div>
+              <div class="stack-card-desc">Any modification invalidates the proof</div>
+            </div>
+          </div>
+          <div class="stack-card">
+            <div class="stack-card-icon red">⏱️</div>
+            <div class="stack-card-text">
+              <div class="stack-card-title">Expiry & Revocation</div>
+              <div class="stack-card-desc">Time-bound credentials with revocation support</div>
+            </div>
+          </div>
+          <div class="stack-card">
+            <div class="stack-card-icon yellow">🔄</div>
+            <div class="stack-card-text">
+              <div class="stack-card-title">Replay Protection</div>
+              <div class="stack-card-desc">Each presentation is unique & single-use</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════
+         FEATURE 3 — Zero-Knowledge Proofs (Service List)
+         ════════════════════════════════════════════════════════════ -->
+    <section class="feature-section reveal">
+      <div class="feature-text">
+        <h2>Prove claims<br>without revealing data.</h2>
+        <div class="feature-divider"></div>
+        <p>Zero-knowledge range proofs let students prove claims like "GPA > 8.0" without revealing the exact value. SHA-256 commitments bind the claim to the signed credential.</p>
+        <p>Built with snarkjs and Circom circuits — the same cryptography powering Ethereum's privacy layer.</p>
+      </div>
+      <div class="feature-visual">
+        <div class="service-list">
+          <div class="service-list-badge">
+            <span>🧮</span> ZKP Capabilities
+          </div>
+          <div class="service-row">
+            <div class="service-row-icon">📊</div>
+            <div class="service-row-text">
+              <div class="service-row-title">GPA Range Proofs</div>
+              <div class="service-row-desc">Prove GPA ≥ threshold without revealing exact score</div>
+            </div>
+            <span class="service-row-arrow">→</span>
+          </div>
+          <div class="service-row">
+            <div class="service-row-icon">🎓</div>
+            <div class="service-row-text">
+              <div class="service-row-title">Enrollment Verification</div>
+              <div class="service-row-desc">Confirm active enrollment status privately</div>
+            </div>
+            <span class="service-row-arrow">→</span>
+          </div>
+          <div class="service-row">
+            <div class="service-row-icon">📱</div>
+            <div class="service-row-text">
+              <div class="service-row-title">QR Code Sharing</div>
+              <div class="service-row-desc">Scan & verify credentials in-person instantly</div>
+            </div>
+            <span class="service-row-arrow">→</span>
+          </div>
+          <div class="service-row">
+            <div class="service-row-icon">⛓️</div>
+            <div class="service-row-text">
+              <div class="service-row-title">Blockchain Anchoring</div>
+              <div class="service-row-desc">Optional on-chain hash for immutable audit trail</div>
+            </div>
+            <span class="service-row-arrow">→</span>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
-  <!-- Footer -->
-  <footer style="text-align:center; padding: var(--space-2xl); border-top: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.8rem;">
-    CredChain — Hackathon Demo · Built with W3C Verifiable Credentials concepts · 
-    <a href="https://www.w3.org/TR/vc-data-model/" target="_blank" style="color: var(--accent-indigo-light);">W3C VC Spec</a>
+  <!-- ════════════════════════════════════════════════════════════
+       HOW IT WORKS
+       ════════════════════════════════════════════════════════════ -->
+  <section class="how-it-works reveal" id="how-it-works">
+    <h2 class="section-heading">How it works</h2>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-watermark">01</div>
+        <div class="step-icon">🏫</div>
+        <h3 class="step-title">College Issues</h3>
+        <p class="step-desc">The university digitally signs academic credentials with their ECDSA private key. The public key is embedded for self-contained verification.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-watermark">02</div>
+        <div class="step-icon">👛</div>
+        <h3 class="step-title">Student Claims</h3>
+        <p class="step-desc">Credentials live in the student's wallet — not in a central database. Students claim using their enrollment ID and connect their wallet.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-watermark">03</div>
+        <div class="step-icon">🎛️</div>
+        <h3 class="step-title">Selectively Share</h3>
+        <p class="step-desc">Toggle switches control which fields to reveal. Generate a verifiable presentation with optional ZKP range proofs for sensitive values.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-watermark">04</div>
+        <div class="step-icon">🔍</div>
+        <h3 class="step-title">Anyone Verifies</h3>
+        <p class="step-desc">Employers or scholarship boards enter a code or scan QR. The system checks the digital signature and validates ZKP proofs — instant, mathematical trust.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+       CTA BANNER
+       ════════════════════════════════════════════════════════════ -->
+  <section class="cta-banner reveal">
+    <h2 class="cta-heading">Ready to go trustless?</h2>
+    <p class="cta-subtitle">Issue your first verifiable credential in under a minute. No signups, no databases — just cryptography.</p>
+    <a href="college.html" class="btn-cta-green">Launch CredChain →</a>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+       FOOTER
+       ════════════════════════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-copy">© 2026 CredChain — Built with W3C Verifiable Credentials</span>
+      <div class="footer-links">
+        <a href="college.html">Issuer Portal</a>
+        <a href="wallet.html">Student Wallet</a>
+        <a href="verifier.html">Verifier</a>
+        <a href="https://www.w3.org/TR/vc-data-model/" target="_blank">W3C VC Spec</a>
+      </div>
+    </div>
   </footer>
+
+  <!-- ════════════════════════════════════════════════════════════
+       SCRIPTS
+       ════════════════════════════════════════════════════════════ -->
+  <script>
+    /* ── Navbar scroll effect ────────────────────────────────── */
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    /* ── Smooth scroll for anchor links ──────────────────────── */
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    /* ── Scroll reveal with IntersectionObserver ──────────────── */
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.reveal').forEach(el => {
+      revealObserver.observe(el);
+    });
+
+    /* ── Toggle switch animation (cycle every 2s) ────────────── */
+    const toggles = document.querySelectorAll('.phone-toggle');
+    let toggleIndex = 0;
+    
+    function cycleToggle() {
+      const toggle = toggles[toggleIndex];
+      if (toggle) {
+        toggle.classList.toggle('on');
+      }
+      toggleIndex = (toggleIndex + 1) % toggles.length;
+    }
+
+    setInterval(cycleToggle, 2000);
+  </script>
 
 </body>
 </html>
