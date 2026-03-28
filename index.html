@@ -28,23 +28,30 @@
   </nav>
 
   <!-- ════════════════════════════════════════════════════════════
-       HERO SECTION
+       HERO — Video Background
        ════════════════════════════════════════════════════════════ -->
   <section class="hero">
-    <div class="hero-badge">
-      <span class="pulse-dot"></span>
-      Built on W3C VCs · Powered by Zero-Knowledge Proofs
+    <div class="hero-video">
+      <video autoplay muted loop playsinline>
+        <source src="assets/Minimal_Logo_Animation_Generation.mp4" type="video/mp4">
+      </video>
     </div>
-    <h1 class="hero-title">
-      Stronger verification,<br>
-      <span class="gradient-text">less fraud.</span>
-    </h1>
-    <p class="hero-subtitle">
-      Stop forged transcripts and fake degrees with cryptographic credentials. Students own their data, colleges sign it, and anyone can verify it — instantly and trustlessly.
-    </p>
-    <div class="hero-buttons">
-      <a href="college.html" class="btn-hero-primary">Issue Credentials →</a>
-      <a href="wallet.html" class="btn-hero-secondary">Open Your Wallet</a>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="pulse-dot"></span>
+        Built on W3C VCs · Powered by Zero-Knowledge Proofs
+      </div>
+      <h1 class="hero-title">
+        Stronger verification,<br>
+        <span class="gradient-text">less fraud.</span>
+      </h1>
+      <p class="hero-subtitle">
+        Stop forged transcripts and fake degrees with cryptographic credentials. Students own their data, colleges sign it, and anyone can verify it — instantly.
+      </p>
+      <div class="hero-buttons">
+        <a href="college.html" class="btn-hero-primary">Issue Credentials →</a>
+        <a href="wallet.html" class="btn-hero-secondary">Open Your Wallet</a>
+      </div>
     </div>
   </section>
 
@@ -106,28 +113,28 @@
       <div class="feature-visual">
         <div class="stacked-cards">
           <div class="stack-card">
-            <div class="stack-card-icon green">🔐</div>
+            <div class="stack-card-icon">🔐</div>
             <div class="stack-card-text">
               <div class="stack-card-title">ECDSA P-256 Signatures</div>
               <div class="stack-card-desc">Mathematically bound to the issuer</div>
             </div>
           </div>
           <div class="stack-card">
-            <div class="stack-card-icon purple">🛡️</div>
+            <div class="stack-card-icon">🛡️</div>
             <div class="stack-card-text">
               <div class="stack-card-title">Tamper Detection</div>
               <div class="stack-card-desc">Any modification invalidates the proof</div>
             </div>
           </div>
           <div class="stack-card">
-            <div class="stack-card-icon red">⏱️</div>
+            <div class="stack-card-icon">⏱️</div>
             <div class="stack-card-text">
               <div class="stack-card-title">Expiry & Revocation</div>
               <div class="stack-card-desc">Time-bound credentials with revocation support</div>
             </div>
           </div>
           <div class="stack-card">
-            <div class="stack-card-icon yellow">🔄</div>
+            <div class="stack-card-icon">🔄</div>
             <div class="stack-card-text">
               <div class="stack-card-title">Replay Protection</div>
               <div class="stack-card-desc">Each presentation is unique & single-use</div>
@@ -228,7 +235,7 @@
   <section class="cta-banner reveal">
     <h2 class="cta-heading">Ready to go trustless?</h2>
     <p class="cta-subtitle">Issue your first verifiable credential in under a minute. No signups, no databases — just cryptography.</p>
-    <a href="college.html" class="btn-cta-green">Launch CredChain →</a>
+    <a href="college.html" class="btn-cta">Launch CredChain →</a>
   </section>
 
   <!-- ════════════════════════════════════════════════════════════
@@ -274,7 +281,7 @@
           entry.target.classList.add('visible');
         }
       });
-    }, { threshold: 0.15 });
+    }, { threshold: 0.12 });
 
     document.querySelectorAll('.reveal').forEach(el => {
       revealObserver.observe(el);
